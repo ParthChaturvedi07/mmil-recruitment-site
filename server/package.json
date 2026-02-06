@@ -6,7 +6,7 @@
   "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx nodemon src/server.js"
+    "start": "npx nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,11 @@
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "morgan": "^1.10.1"
+    "google-auth-library": "^10.5.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.5",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "node": "^25.6.0"
   }
 }
