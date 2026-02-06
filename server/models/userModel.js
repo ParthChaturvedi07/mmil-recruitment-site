@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
 
   email: { type: String, unique: true },
 
-
   role: {
     type: String,
     enum: ["student", "admin"],
@@ -64,6 +63,7 @@ phone:{
   }
 }
 )
+
 const userModel = mongoose.model.user || mongoose.model("user", userSchema)
 
 export default userModel

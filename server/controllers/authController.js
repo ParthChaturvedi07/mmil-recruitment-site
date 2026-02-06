@@ -36,8 +36,6 @@ const client = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
     }
 }
 
-
-
 // profile complete 
 
  const completeProfile = async (req, res) => {

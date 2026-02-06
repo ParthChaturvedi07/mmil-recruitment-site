@@ -8,8 +8,6 @@ const DesignSchema = new mongoose.Schema({
     githubLink:{
         type:String
     }
-   
-    
 });
 
 const designModel = mongoose.model.design || mongoose.model('design', DesignSchema)
