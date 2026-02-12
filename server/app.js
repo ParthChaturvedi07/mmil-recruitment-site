@@ -8,8 +8,9 @@ import profileRouter from "./routes/profileUpdateRoute.js";
 import webDevRouter from "./routes/webDevRoute.js";
 import technicalRouter from "./routes/technicalRoute.js";
 import designRouter from "./routes/designRoute.js";
+import applicationsRouter from "./routes/applicationsRoute.js";
 
-import applications from "./routes/applicationsRoute.js";
+
 
 const app = express();
 
