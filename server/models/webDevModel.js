@@ -4,7 +4,7 @@ const webDevSchema = new mongoose.Schema({
     
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User"},
+    ref: "user"},
    hostedSiteLink: String, 
    githubRepoLink: String,
    submittedAt: {

@@ -10,6 +10,7 @@ const submitTechnicalProject = async (req, res) => {
     }
 
     const newProject = await technicalModel.create({
+      userId: req.user.id,
       githubLink,
       projectLink,
     });

@@ -12,10 +12,10 @@ const designRouter = express.Router();
 designRouter.post(
   "/add-design",
   authMiddleware,
-
+ designMiddleware,
   addDesignProject,
 );
 
-designRouter.get("/designs", getDesignProjects);
+designRouter.get("/designs", authMiddleware, getDesignProjects);
 
 export default designRouter;

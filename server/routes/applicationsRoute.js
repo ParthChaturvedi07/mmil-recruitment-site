@@ -1,8 +1,21 @@
-import express from 'express'
-import { getAllApplications } from '../controllers/applicationsController.js'
+import express from "express";
+import authMiddleware from "../middlewares/authMiddleware.js";
+import adminMiddleware from "../middlewares/adminMiddleware.js";
+import { getAllApplications,getApplicationsByDepartment } from "../controllers/applicationsController.js";
 
-const applications = express.Router()
+const router = express.Router();
 
-applications.get("/applications", getAllApplications)
+router.get(
+  "/applications",
+  authMiddleware,
+  adminMiddleware,
+  getAllApplications
+);
 
-export default applications
+router.get(
+  "/applications/:department",
+  authMiddleware,
+  adminMiddleware,
+  getApplicationsByDepartment
+);
+export default router;
