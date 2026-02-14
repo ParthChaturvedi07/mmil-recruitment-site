@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const webDevSchema = new mongoose.Schema({
     
   userId: {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User"},
    hostedSiteLink: String, 
    githubRepoLink: String,
