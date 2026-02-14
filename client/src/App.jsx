@@ -5,6 +5,8 @@ import CompleteProfile from "./pages/CompleteProfile";
 import AllApplications from "./pages/Admin/AllApplications";
 import DepartmentApplications from "./pages/admin/DepartmentApplications";
 import { ToastContainer } from "react-toastify";
+import AdminPage from './pages/AdminPage';
+import DomainStudents from './pages/DomainStudents';
 
 const App = () => {
   return (
@@ -12,11 +14,16 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path="/complete-profile" element={<CompleteProfile />} />
+<<<<<<< HEAD
 
        {/* Admin Routes */}
        
       <Route path="/admin/applications" element={<AllApplications />} />
       <Route path="/admin/applications/:department" element={<DepartmentApplications />} />
+=======
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/:domainName" element={<DomainStudents />} />
+>>>>>>> origin/feature/stage2recruitment
       </Routes>
       <ToastContainer position="top-center" />
       
