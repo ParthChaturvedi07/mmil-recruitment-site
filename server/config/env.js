@@ -6,5 +6,6 @@ export const ENV = {
   NODE_ENV: process.env.NODE_ENV || "development",
   MONGO_URI: process.env.MONGO_URI,
   GOOGLE_CLIENT_ID:process.env.GOOGLE_CLIENT_ID,
-  JWT_SECRET:process.env.JWT_SECRET
+  JWT_SECRET:process.env.JWT_SECRET,
+  GEMINI_API_KEY:process.env.GEMINI_API_KEY
 };
