@@ -171,14 +171,44 @@ function Chatbot() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+      
+    <div className="min-h-screen bg-[#FDF5E6] flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+    
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-blue-600 text-white p-4">
+          <div className="bg-[#FFE0D4] rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-[#72341E] text-white p-4">
               <h2 className="text-xl font-bold">MMIL Recruitment Assistant</h2>
               <p className="text-sm opacity-90">I'll help you complete your profile step by step</p>
             </div>
+
+              {/* Logo */}
+  <div className="absolute left-1/2 -translate-x-1/2 top-8">
+    <img
+      src="/mmil-logo1.png"
+      alt="MMIL Logo"
+      className="w-40 h-auto object-contain"
+    />
+  </div>
+
+{/* 3. DECORATIVE ELEMENTS  */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute flex flex-col items-center" style={{ top: "143px", right: "calc(50% - 620px)" }}>
+          <img src="/light-bulb 1.png" alt="Bulb" className="w-[110px] h-auto object-contain z-20" />
+          <div className="absolute top-[110px] right-[8%] z-0">
+            <img src="/Vector 1.png" alt="Line Decoration" style={{ width: "375px", height: "210px" }} />
+          </div>
+        </div>
+      </div>
+
+      {/* 5. STAR DECORATIONS */}
+      <div className="absolute inset-0 pointer-events-none">
+        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto " style={{ top: "80px", left: "calc(50% - 430px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
+        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "640px", left: "calc(50% - -360px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
+      </div>
+
+            
+            
             
             <div className="h-96 overflow-y-auto p-4 space-y-4">
               {messages.map((message, index) => (
@@ -189,8 +219,8 @@ function Chatbot() {
                   <div
                     className={`max-w-xs px-4 py-2 rounded-lg ${
                       message.role === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-800"
+                        ? "bg-[#FDF5E6] text-[#72341E]"
+                        : "bg-[#EAEAEA] text-gray-600"
                     }`}
                   >
                     {message.content}
@@ -236,13 +266,13 @@ function Chatbot() {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#72341E]"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={isLoading || (!inputMessage.trim() && !resumeFile)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-[#72341E] text-white rounded-lg hover:bg-[#72341E] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Send
                 </button>
