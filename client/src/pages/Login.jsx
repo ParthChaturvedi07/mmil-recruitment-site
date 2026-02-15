@@ -2,7 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import AuthButton from "../components/AuthButton";
 import { API_ENDPOINTS } from "../config/api.js";
 

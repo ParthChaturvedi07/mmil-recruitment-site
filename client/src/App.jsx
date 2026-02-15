@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Chatbot from "./pages/Chatbot";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import PublicRoute from "./components/PublicRoute";
 // import AdminPage from "./pages/AdminPage";
 // import DomainStudents from "./pages/DomainStudents";
 import { useNavigate } from "react-router-dom";
@@ -72,7 +73,7 @@ const StartScreen = ({ onStart }) => {
       </div>
 
       {/*  VECTOR 2 STARS  */}
-       <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "40px", left: "calc(50% - 410px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
         <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "675px", left: "calc(50% - 520px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
       </div>
@@ -147,10 +148,10 @@ const App = () => {
     setStage("website");
   };
   useEffect(() => {
-  if (stage === "website") {
-    navigate("/");
-  }
-}, [stage]);
+    if (stage === "website") {
+      navigate("/");
+    }
+  }, [stage]);
   return (
     <>
       {/* Splash Screen */}
@@ -164,8 +165,10 @@ const App = () => {
         <>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
             <Route path="/complete-profile" element={<Chatbot />} />
             {/* <Route path="/admin" element={<AdminPage />} /> */}
             {/* <Route path="/admin/:domainName" element={<DomainStudents />} /> */}
