@@ -124,8 +124,8 @@ function Chatbot() {
 
       // Check if profile is complete
       if (res.data.profileComplete) {
-        toast.success("Profile completed successfully!");
-        setTimeout(() => navigate("/"), 2000);
+        toast.success("Registration and profile completed");
+        setTimeout(() => navigate("/"), 2500);
       }
 
       // Show updated fields notification

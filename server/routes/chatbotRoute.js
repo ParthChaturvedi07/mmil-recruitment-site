@@ -63,11 +63,11 @@ const validateForField = (field, message, user) => {
   const vLower = v.toLowerCase();
 
   if (field === "branch") {
-    const validBranches = ["cse", "cse-aiml", "cseaiml", "aiml", "it", "ece", "ee", "civil", "me", "che"];
+    const validBranches = ["cse", "cse-aiml", "cseaiml", "aiml", "it", "ece", "ee", "civil", "me", "che", "csds", "cs-ds", "cseds", "cse-ds"];
     const branchPattern = new RegExp(`\\b(${validBranches.join("|")})\\b`, "i");
     const match = vLower.match(branchPattern);
     if (!match) {
-      return { field: "branch", message: "Please enter a valid branch (CSE, IT, ECE, EE, Civil, ME, CHE, CSE-AIML)." };
+      return { field: "branch", message: "Please enter a valid branch (CSE, IT, ECE, EE, Civil, ME, CHE, CSE-AIML, CSE-DS)." };
     }
   }
 
@@ -158,7 +158,7 @@ const buildOnboardingReply = (user, updatedFields) => {
 const extractUserInfo = (message, user) => {
   const info = {};
   const msgLower = message.toLowerCase();
-  
+
   // 1. EXTRACT YEAR
   // Accepts: "1", "2", "1st", "first", "first year", etc.
   if (!user.year) {
@@ -172,18 +172,19 @@ const extractUserInfo = (message, user) => {
       info.year = yearMap[yearMatch[1]];
     }
   }
-  
+
   // 2. EXTRACT BRANCH
   // Accepts: "CSE", "CSE-AIML", "AIML", "IT", etc.
   if (!user.branch) {
-    const validBranches = ['cse', 'cse-aiml', 'cseaiml', 'aiml', 'it', 'ece', 'ee', 'civil', 'me', 'che'];
+    const validBranches = ['cse', 'cse-aiml', 'cseaiml', 'aiml', 'it', 'ece', 'ee', 'civil', 'me', 'che', 'csds', 'cs-ds', 'cseds', 'cse-ds'];
     const branchPattern = new RegExp(`\\b(${validBranches.join('|')})\\b`, 'i');
     const branchMatch = msgLower.match(branchPattern);
-    
+
     if (branchMatch) {
       let rawBranch = branchMatch[1].toUpperCase();
       // Normalize variations
       if (rawBranch === 'AIML' || rawBranch === 'CSEAIML') rawBranch = 'CSE-AIML';
+      if (['CSDS', 'CS-DS', 'CSEDS'].includes(rawBranch)) rawBranch = 'CSE-DS';
       info.branch = rawBranch;
     }
   }
@@ -199,7 +200,7 @@ const extractUserInfo = (message, user) => {
 
     if (fullMatch) {
       info.admissionNumber = fullMatch[1];
-    } 
+    }
     // If no full match, try extracting just the roll number (Strategy B)
     else if (user.year && user.branch) {
       // Look for a standalone 2 or 3 digit number (e.g. "43", "043")
@@ -217,10 +218,10 @@ const extractUserInfo = (message, user) => {
         // Example: 1st year in 2025 -> Batch 24. 2nd year -> Batch 23.
         const currentBatchYear = 25; // Change this based on current academic year logic
         const yearPrefix = (currentBatchYear - (parseInt(user.year) - 1)).toString();
-        
+
         // Clean branch string for ID (remove spaces/symbols)
         const cleanBranch = user.branch.toLowerCase().replace(/[^a-z]/g, '');
-        
+
         info.admissionNumber = `${yearPrefix}${cleanBranch}${rollDigits}`;
       }
     }
@@ -250,7 +251,7 @@ const extractUserInfo = (message, user) => {
       }
     }
   }
-  
+
   // 6. EXTRACT DEPARTMENT
   if (!user.department) {
     const deptPattern = /\b(technical|webdev|programming|designing|web development|design)\b/i;
@@ -262,7 +263,7 @@ const extractUserInfo = (message, user) => {
       else info.department = raw;
     }
   }
-  
+
   // 7. EXTRACT LINKS
   if (!user.links?.github) {
     const match = message.match(/github\.com\/[\w\-]+/i);
@@ -276,7 +277,7 @@ const extractUserInfo = (message, user) => {
     const match = message.match(/behance\.net\/[\w\-]+/i);
     if (match) info.behance = "https://" + match[0];
   }
-  
+
   return info;
 };
 
@@ -372,20 +373,20 @@ chatbotRouter.post("/chat", async (req, res) => {
       if (nextExpectedField === "designPortfolio") extractedInfo.figma = "none";
     }
     let updatedFields = [];
-    
+
     // Helper to update fields
     const updateField = (field, value, logName) => {
       // Only update if value exists and is different/new
       if (value) {
         if (field === 'links') {
-             if (!user.links) user.links = {};
-             // Handle links separately if needed, simplified here:
-             if (value.github && !user.links.github) { user.links.github = value.github; updatedFields.push("github"); }
-             if (value.figma && !user.links.figma) { user.links.figma = value.figma; updatedFields.push("figma"); }
-             if (value.behance && !user.links.behance) { user.links.behance = value.behance; updatedFields.push("behance"); }
+          if (!user.links) user.links = {};
+          // Handle links separately if needed, simplified here:
+          if (value.github && !user.links.github) { user.links.github = value.github; updatedFields.push("github"); }
+          if (value.figma && !user.links.figma) { user.links.figma = value.figma; updatedFields.push("figma"); }
+          if (value.behance && !user.links.behance) { user.links.behance = value.behance; updatedFields.push("behance"); }
         } else {
-             user[field] = value;
-             updatedFields.push(logName);
+          user[field] = value;
+          updatedFields.push(logName);
         }
       }
     };
@@ -396,10 +397,10 @@ chatbotRouter.post("/chat", async (req, res) => {
     updateField('admissionNumber', extractedInfo.admissionNumber, "Admission Number");
     updateField('universityRoll', extractedInfo.universityRoll, "University Roll");
     updateField('phone', extractedInfo.phone, "Phone");
-    updateField('links', { 
-        github: extractedInfo.github, 
-        figma: extractedInfo.figma, 
-        behance: extractedInfo.behance 
+    updateField('links', {
+      github: extractedInfo.github,
+      figma: extractedInfo.figma,
+      behance: extractedInfo.behance
     }, "Links");
 
     if (updatedFields.length > 0) {
@@ -439,16 +440,16 @@ chatbotRouter.post("/chat", async (req, res) => {
 
     // 3. Validation Feedback (Only if extraction FAILED but user TRIED)
     let validationFeedback = "";
-    
+
     // Example: User provided a number for phone, but it wasn't 10 digits
     if (!user.phone && !extractedInfo.phone) {
-        // If message contains digits but not 10 of them
-        if (/\d+/.test(message) && !/\d{10}/.test(message) && !user.admissionNumber) {
-            // Only complain if we aren't looking for admission number/roll no
-             if (user.admissionNumber && user.universityRoll) {
-                 validationFeedback = "That looks like a number, but for a phone number, I need exactly 10 digits.";
-             }
+      // If message contains digits but not 10 of them
+      if (/\d+/.test(message) && !/\d{10}/.test(message) && !user.admissionNumber) {
+        // Only complain if we aren't looking for admission number/roll no
+        if (user.admissionNumber && user.universityRoll) {
+          validationFeedback = "That looks like a number, but for a phone number, I need exactly 10 digits.";
         }
+      }
     }
 
     // 4. Vector Search (RAG)
@@ -456,14 +457,14 @@ chatbotRouter.post("/chat", async (req, res) => {
       apiKey: ENV.GEMINI_API_KEY,
       model: "gemini-embedding-001",
     });
-    
+
     let context = "";
     try {
-        const vectorStore = await HNSWLib.load("./vectorstore", embeddings);
-        const docs = await vectorStore.similaritySearch(message, 3); // Reduced to 3 for speed
-        context = docs.map(d => d.pageContent).join("\n");
+      const vectorStore = await HNSWLib.load("./vectorstore", embeddings);
+      const docs = await vectorStore.similaritySearch(message, 3); // Reduced to 3 for speed
+      context = docs.map(d => d.pageContent).join("\n");
     } catch (e) {
-        console.warn("Vector store not loaded/found, continuing without context.");
+      console.warn("Vector store not loaded/found, continuing without context.");
     }
 
     // 5. Construct Prompt
@@ -534,17 +535,17 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
     addMessage(userId, "assistant", text);
 
     // 7. Check Completion
-    const isComplete = user.year && user.branch && user.department && 
-                     user.admissionNumber && user.universityRoll && user.phone && 
-                     user.resume && 
-                     (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
+    const isComplete = user.year && user.branch && user.department &&
+      user.admissionNumber && user.universityRoll && user.phone &&
+      user.resume &&
+      (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
 
     if (isComplete && !user.isProfileComplete) {
       user.isProfileComplete = true;
       await user.save();
     }
 
-    res.json({ 
+    res.json({
       reply: text,
       profileComplete: !!isComplete,
       updatedFields: updatedFields,
@@ -568,7 +569,7 @@ chatbotRouter.post("/create-test-user", async (req, res) => {
       googleId: "test123",
       isProfileComplete: false
     });
-    
+
     res.json({
       userId: testUser._id,
       message: "Test user created successfully"
@@ -592,21 +593,21 @@ chatbotRouter.post("/upload-resume", authMiddleware, upload.single("resume"), as
     if (!user) return res.status(404).json({ error: "User not found" });
 
     // Check if everything else is done
-    const isComplete = user.year && user.branch && user.department && 
-                     user.admissionNumber && user.universityRoll && user.phone && 
-                     user.resume && 
-                     (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
+    const isComplete = user.year && user.branch && user.department &&
+      user.admissionNumber && user.universityRoll && user.phone &&
+      user.resume &&
+      (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
 
     if (isComplete) {
-        user.isProfileComplete = true;
-        await user.save();
+      user.isProfileComplete = true;
+      await user.save();
     }
 
     addMessage(userId, "user", "📄 Resume uploaded");
     const reply = "Perfect! Received your resume. " + (isComplete ? "Your profile is now complete! 🎉" : "What is the next detail?");
     addMessage(userId, "assistant", reply);
 
-    res.json({ 
+    res.json({
       message: "Resume uploaded successfully",
       profileComplete: !!isComplete,
       reply: reply
@@ -618,5 +619,5 @@ chatbotRouter.post("/upload-resume", authMiddleware, upload.single("resume"), as
   }
 });
 
-export default chatbotRouter;        
+export default chatbotRouter;
 

@@ -27,8 +27,6 @@ function Register() {
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
 
-      toast.success("Registered successfully");
-
       if (needsProfile) {
         navigate("/complete-profile");
       } else {
