@@ -15,7 +15,7 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("https://mmil-recruitment-site.vercel.app/api/auth/login", {
+      const res = await axios.post("http://localhost:5000/login", {
         email,
         password,
       });
