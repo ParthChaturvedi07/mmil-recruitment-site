@@ -2,7 +2,7 @@ import React from 'react'
 import { Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
 import CompleteProfile from "./pages/CompleteProfile";
-import AllApplications from "./pages/Admin/AllApplications";
+import AllApplications from "./pages/admin/AllApplications";
 import DepartmentApplications from "./pages/admin/DepartmentApplications";
 import { ToastContainer } from "react-toastify";
 import AdminPage from './pages/AdminPage';
