@@ -5,8 +5,8 @@ import Home from "./pages/Home";
 import Chatbot from "./pages/Chatbot";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import AdminPage from "./pages/AdminPage";
-import DomainStudents from "./pages/DomainStudents";
+// import AdminPage from "./pages/AdminPage";
+// import DomainStudents from "./pages/DomainStudents";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -167,8 +167,8 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/complete-profile" element={<Chatbot />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/:domainName" element={<DomainStudents />} />
+            {/* <Route path="/admin" element={<AdminPage />} /> */}
+            {/* <Route path="/admin/:domainName" element={<DomainStudents />} /> */}
           </Routes>
 
           <ToastContainer position="top-center" />
