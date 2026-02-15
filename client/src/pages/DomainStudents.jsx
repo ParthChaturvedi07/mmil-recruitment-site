@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const DomainStudents = () => {
   const { domainName } = useParams();
   const [students, setStudents] = useState([]);
 
   useEffect(() => {
-    fetch(`/api/admin/applications`)
+    fetch(API_ENDPOINTS.APPLICATIONS)
       .then(res => res.json())
       .then(data => setStudents(data));
   }, [domainName]);

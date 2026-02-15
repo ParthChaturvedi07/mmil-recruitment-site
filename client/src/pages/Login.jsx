@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import AuthButton from "../components/AuthButton";
+import { API_ENDPOINTS } from "../config/api.js";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(API_ENDPOINTS.LOGIN, {
         email,
         password,
       });

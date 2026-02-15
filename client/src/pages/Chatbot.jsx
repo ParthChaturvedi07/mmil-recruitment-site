@@ -2,7 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+<<<<<<< Updated upstream
 import Navbar from "../components/Navbar";
+=======
+import { API_ENDPOINTS } from "../config/api.js";
+
+>>>>>>> Stashed changes
 
 function Chatbot() {
   const [messages, setMessages] = useState([]);
@@ -42,7 +47,7 @@ function Chatbot() {
     const startConversation = async () => {
       try {
         console.log("Starting conversation with userId:", userId);
-        const res = await axios.post("http://localhost:5000/api/chat/chat", {
+        const res = await axios.post(API_ENDPOINTS.CHAT, {
           message: "Hello, I want to start my profile registration",
           userId: userId,
         });
@@ -93,7 +98,7 @@ function Chatbot() {
         formData.append("userId", userId);
         
         res = await axios.post(
-          "http://localhost:5000/api/chat/upload-resume",
+          API_ENDPOINTS.UPLOAD_RESUME,
           formData,
           {
             headers: {
@@ -108,7 +113,7 @@ function Chatbot() {
         setShowResumeUpload(false);
       } else {
         // Regular chat message
-        res = await axios.post("http://localhost:5000/api/chat/chat", {
+        res = await axios.post(API_ENDPOINTS.CHAT, {
           message: userMessage,
           userId: userId,
         });

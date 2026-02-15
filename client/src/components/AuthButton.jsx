@@ -2,12 +2,13 @@ import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { API_ENDPOINTS } from "../config/api.js";
 function AuthButton() {
     const navigate = useNavigate()
   const handleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/google",
+        API_ENDPOINTS.GOOGLE_AUTH,
         { token: credentialResponse.credential }
       );
         const {token , needsProfile, userId} = res.data
