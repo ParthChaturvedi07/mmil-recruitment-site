@@ -3,6 +3,7 @@ import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { ENV } from "../config/env.js";
+import { keyManager } from "../utils/keyManager.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -23,10 +24,10 @@ const createVectorStore = async () => {
   const splitDocs = await splitter.splitDocuments(docs);
 
   console.log("🧠 Creating embeddings with gemini-embedding-001...");
-  
+
   // --- CORRECT MODEL CONFIGURATION ---
   const embeddings = new GoogleGenerativeAIEmbeddings({
-    apiKey: ENV.GEMINI_API_KEY,
+    apiKey: keyManager.getApiKey(),
     model: "gemini-embedding-001", // The ONLY model you have access to
     // taskType is REMOVED (not supported by this model)
   });
