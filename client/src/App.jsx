@@ -12,23 +12,19 @@ const App = () => {
   return (
     <div>
       <Routes>
-        <Route path='/' element={<Home/>}/>
+        <Route path='/' element={<Home />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
-<<<<<<< HEAD
 
-       {/* Admin Routes */}
-       
-      <Route path="/admin/applications" element={<AllApplications />} />
-      <Route path="/admin/applications/:department" element={<DepartmentApplications />} />
-=======
+        {/* Admin Routes */}
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/:domainName" element={<DomainStudents />} />
->>>>>>> origin/feature/stage2recruitment
+        <Route path="/admin/applications" element={<AllApplications />} />
+        <Route path="/admin/applications/:department" element={<DepartmentApplications />} />
+
       </Routes>
       <ToastContainer position="top-center" />
-      
     </div>
   )
 }
 
-export default App
+export default App;
