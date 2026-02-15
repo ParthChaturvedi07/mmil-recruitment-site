@@ -2,12 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-<<<<<<< Updated upstream
-import Navbar from "../components/Navbar";
-=======
 import { API_ENDPOINTS } from "../config/api.js";
 
->>>>>>> Stashed changes
 
 function Chatbot() {
   const [messages, setMessages] = useState([]);
@@ -51,7 +47,7 @@ function Chatbot() {
           message: "Hello, I want to start my profile registration",
           userId: userId,
         });
-        
+
         setMessages([
           { role: "assistant", content: res.data.reply }
         ]);
@@ -90,13 +86,13 @@ function Chatbot() {
 
     try {
       let res;
-      
+
       if (resumeFile) {
         // Handle resume upload
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("userId", userId);
-        
+
         res = await axios.post(
           API_ENDPOINTS.UPLOAD_RESUME,
           formData,
@@ -107,7 +103,7 @@ function Chatbot() {
             }
           }
         );
-        
+
         setMessages(prev => [...prev, { role: "user", content: "📄 Resume uploaded" }]);
         setResumeFile(null);
         setShowResumeUpload(false);
@@ -145,7 +141,7 @@ function Chatbot() {
       if (assistantReply.toLowerCase().includes("resume") || assistantReply.toLowerCase().includes("upload")) {
         setShowResumeUpload(true);
       }
-      
+
       // Check if format examples are mentioned and show them in UI
       if (assistantReply.includes("24cseaiml043") || assistantReply.includes("2500935001")) {
         // Format guidance is already in the message
@@ -177,7 +173,6 @@ function Chatbot() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -185,7 +180,7 @@ function Chatbot() {
               <h2 className="text-xl font-bold">MMIL Recruitment Assistant</h2>
               <p className="text-sm opacity-90">I'll help you complete your profile step by step</p>
             </div>
-            
+
             <div className="h-96 overflow-y-auto p-4 space-y-4">
               {messages.map((message, index) => (
                 <div
@@ -193,17 +188,16 @@ function Chatbot() {
                   className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${
-                      message.role === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-800"
-                    }`}
+                    className={`max-w-xs px-4 py-2 rounded-lg ${message.role === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-800"
+                      }`}
                   >
                     {message.content}
                   </div>
                 </div>
               ))}
-              
+
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
@@ -215,10 +209,10 @@ function Chatbot() {
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
-            
+
             <div className="border-t p-4">
               {showResumeUpload && (
                 <div className="mb-4 p-3 bg-blue-50 rounded-lg">
@@ -234,7 +228,7 @@ function Chatbot() {
                   )}
                 </div>
               )}
-              
+
               <form onSubmit={handleSendMessage} className="flex space-x-2">
                 <input
                   ref={inputRef}
