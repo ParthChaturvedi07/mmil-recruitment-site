@@ -4,13 +4,13 @@ import { ENV } from "./config/env.js"; // Ensure this path is correct
 
 async function listChatModels() {
   console.log("🔍 Checking available Chat models...");
-  
+
   try {
     // We fetch the raw list from Google's API
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${ENV.GEMINI_API_KEY}`
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${ENV.GEMINI_API_KEYS[0]}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
@@ -19,7 +19,7 @@ async function listChatModels() {
 
     console.log("\n✅ YOUR AVAILABLE CHAT MODELS:");
     console.log("---------------------------------");
-    
+
     const chatModels = data.models
       .filter(m => m.supportedGenerationMethods.includes("generateContent"))
       .map(m => m.name); // This gives us the EXACT string ID

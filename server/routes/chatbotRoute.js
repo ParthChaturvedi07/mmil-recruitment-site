@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { ENV } from "../config/env.js";
+import { keyManager } from "../utils/keyManager.js";
 import { getSession, addMessage } from "../utils/chatMemory.js";
 import userModel from "../models/userModel.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -454,7 +455,7 @@ chatbotRouter.post("/chat", async (req, res) => {
 
     // 4. Vector Search (RAG)
     const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: ENV.GEMINI_API_KEY,
+      apiKey: keyManager.getApiKey(),
       model: "gemini-embedding-001",
     });
 
@@ -490,10 +491,15 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
     // 6. Generate Response (with fallback so chat never hard-fails)
     let text = "";
     try {
-      const genAI = new GoogleGenerativeAI(ENV.GEMINI_API_KEY);
       const modelName = ENV.GEMINI_MODEL || "gemini-3-flash";
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
+
+      // Execute with retry logic using KeyManager
+      const result = await keyManager.executeWithRetry(async (apiKey) => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        return await model.generateContent(prompt);
+      });
+
       text = result.response.text();
     } catch (aiErr) {
       console.error("Gemini generateContent error:", aiErr?.message || aiErr);
