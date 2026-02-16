@@ -26,7 +26,7 @@ const getMissingFields = (user) => {
     if (!user.links?.github) missingFields.push("github");
   }
 
-  if (!user.resume) missingFields.push("resume");
+  if (user.year === "2" && !user.resume) missingFields.push("resume");
   return missingFields;
 };
 
@@ -43,7 +43,7 @@ const getQuestionForField = (field, userName) => {
     case "universityRoll":
       return "Great—now please enter your university roll number (11–13 digits).";
     case "phone":
-      return "Lastly for contact—please share your phone number (10 digits).";
+      return "Now, for contact—please share your phone number (10 digits).";
     case "github":
       return "Please share your GitHub profile link (for example: https://github.com/your-username) or type 'none'.";
     case "designPortfolio":
@@ -523,7 +523,7 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
         } else {
           if (!user.links.github) missing.push("github link");
         }
-        if (!user.resume) missing.push("resume");
+        if (user.year === "2" && !user.resume) missing.push("resume");
 
         const next = missing[0];
         if (!next) {
@@ -543,7 +543,7 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
     // 7. Check Completion
     const isComplete = user.year && user.branch && user.department &&
       user.admissionNumber && user.universityRoll && user.phone &&
-      user.resume &&
+      (user.year !== "2" || user.resume) &&
       (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
 
     if (isComplete && !user.isProfileComplete) {
@@ -571,13 +571,14 @@ chatbotRouter.post("/create-test-user", async (req, res) => {
   try {
     const testUser = await userModel.create({
       name: "Test User",
-      email: "test@example.com",
-      googleId: "test123",
+      email: `test${Date.now()}@example.com`,
+      googleId: `test${Date.now()}`,
       isProfileComplete: false
     });
 
     res.json({
       userId: testUser._id,
+      email: testUser.email,
       message: "Test user created successfully"
     });
   } catch (err) {
@@ -601,7 +602,7 @@ chatbotRouter.post("/upload-resume", authMiddleware, upload.single("resume"), as
     // Check if everything else is done
     const isComplete = user.year && user.branch && user.department &&
       user.admissionNumber && user.universityRoll && user.phone &&
-      user.resume &&
+      (user.year !== "2" || user.resume) &&
       (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
 
     if (isComplete) {

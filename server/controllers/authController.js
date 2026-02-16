@@ -136,23 +136,7 @@ const registerWithEmail = async (req, res) => {
     let user = await userModel.findOne({ email: normalizedEmail });
 
     if (user) {
-      // SCENARIO 1: User exists and ALREADY has a password
-      if (user.passwordHash) {
-        return res.status(409).json({ message: "Email already registered. Please login." });
-      }
-
-      // SCENARIO 2: User exists via Google (no password), but wants to set a password now
-      // This "Links" the accounts
-      user.passwordHash = await bcrypt.hash(password, 10);
-      if (name && !user.name) user.name = name; // Only update name if missing
-      await user.save();
-
-      const token = signAppToken(user);
-      return res.status(200).json({
-        token,
-        userId: user._id,
-        needsProfile: !user.isProfileComplete
-      });
+      return res.status(409).json({ message: "Account already exists. Please login with Google or your password." });
     }
 
     // SCENARIO 3: New User
