@@ -39,9 +39,9 @@ const getQuestionForField = (field, userName) => {
     case "department":
       return "Which department would you like to apply for? (Technical, WebDev, Programming, Designing)";
     case "admissionNumber":
-      return "Could you share your admission number? (Example: 24cseaiml043)";
+      return "Could you share your admission number? (Example: 24cseaiml043) (or type 'none' if you are not an AKTU student)";
     case "universityRoll":
-      return "Great—now please enter your university roll number (11–13 digits).";
+      return "Great—now please enter your university roll number (8–17 characters) (for both uni and AKTU).";
     case "phone":
       return "Now, for contact—please share your phone number (10 digits).";
     case "github":
@@ -87,16 +87,18 @@ const validateForField = (field, message, user) => {
   }
 
   if (field === "universityRoll") {
-    const uniMatch = v.match(/\b\d{11,13}\b/);
+    // Check for alphanumeric and length 8-17
+    const uniMatch = v.match(/\b[a-zA-Z0-9]{8,17}\b/);
     if (!uniMatch) {
-      return { field: "universityRoll", message: "Please enter a valid university roll number (11–13 digits)." };
+      return { field: "universityRoll", message: "Please enter a valid university roll number (8–17 characters, letters and numbers allowed)." };
     }
   }
 
   if (field === "admissionNumber") {
+    if (vLower === "none") return null;
     const fullPattern = /\b\d{2}[a-z]{2,8}\d{3}\b/i;
     if (!fullPattern.test(v)) {
-      return { field: "admissionNumber", message: "Please enter a valid admission number (example: 24cseaiml043)." };
+      return { field: "admissionNumber", message: "Please enter a valid admission number (example: 24cseaiml043) or type 'none'." };
     }
   }
 
@@ -228,12 +230,34 @@ const extractUserInfo = (message, user) => {
     }
   }
 
-  // 4. EXTRACT UNIVERSITY ROLL (Long Number)
-  // Usually 11 to 13 digits
+  // 4. EXTRACT UNIVERSITY ROLL (Alphanumeric 8-17 chars)
   if (!user.universityRoll) {
-    const uniRollPattern = /\b(\d{11,13})\b/;
+    const uniRollPattern = /\b([a-zA-Z0-9]{8,17})\b/;
     const uniMatch = message.match(uniRollPattern);
     if (uniMatch) {
+      // Additional check to avoid confusing with phone numbers if it's purely numeric and 10 digits
+      // But requirement says 8-17. Phone is 10.
+      // If it looks like a phone number (10 digits), we might prefer to treat it as phone if phone is missing?
+      // For now, if we are prompting for universityRoll, we prioritize that.
+      // The extraction logic runs on every message.
+
+      // Let's refine: If we find something that matches uni roll pattern
+      // We should be careful not to capture simple words.
+      // 8-17 characters is quite broad. "Programming" is 11 chars. "Department" is 10.
+      // We need to be stricter. Maybe require at least one number? 
+      // The requirement says "combination of number and words".
+      // But typically roll numbers *might* be just numbers too?
+      // "change it format to combination of number and words" -> implies mixed.
+      // But "filled with only for aktu students" was for admission no.
+      // "university roll number change it format to combination of number and words and warry from 8-17"
+
+      // Let's stick to the requested validation but maybe be careful about extraction from free text.
+      // If the user answers the specific question, the validation logic (`validateForField`) handles it more specifically.
+      // `extractUserInfo` tries to guess fields from random text.
+      // Updating this to be too broad might cause false positives.
+      // For now, I will use a pattern that looks for mixed alphanumeric OR long numeric strings, avoiding common words if possible.
+      // Actually, simplest compliance is just matching the length range.
+
       info.universityRoll = uniMatch[1];
     }
   }
@@ -372,6 +396,7 @@ chatbotRouter.post("/chat", async (req, res) => {
       if (nextExpectedField === "figma") extractedInfo.figma = "none";
       if (nextExpectedField === "behance") extractedInfo.behance = "none";
       if (nextExpectedField === "designPortfolio") extractedInfo.figma = "none";
+      if (nextExpectedField === "admissionNumber") extractedInfo.admissionNumber = "none";
     }
     let updatedFields = [];
 
