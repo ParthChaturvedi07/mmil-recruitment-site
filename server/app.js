@@ -6,7 +6,8 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 
 import authRouter from "./routes/authRoute.js";
 import profileRouter from "./routes/profileUpdateRoute.js";
-import adminRouter from "./routes/adminRoute.js";
+import chatbotRouter from "./routes/chatbotRoute.js";
+// import adminRouter from "./routes/adminRoute.js";
 
 import webDevRouter from "./routes/webDevRoute.js";
 import technicalRouter from "./routes/technicalRoute.js";
@@ -17,16 +18,21 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 // Auth routes
 app.use("/api/auth", authRouter);
 
+app.use("/api/auth",authRouter)
+app.use("/api/auth",profileRouter)
+// app.use("/api/auth",adminRouter)
+app.use("/api/chat",chatbotRouter)
 // Profile routes
 app.use("/api/profile", profileRouter);
 
 // Admin routes
-app.use("/api/admin", adminRouter);
+// app.use("/api/admin", adminRouter);
 app.use("/api/admin/applications", applicationsRouter);
 
 // Domain routes

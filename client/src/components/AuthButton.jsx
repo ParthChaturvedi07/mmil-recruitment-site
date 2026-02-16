@@ -7,16 +7,18 @@ function AuthButton() {
   const handleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/google",
+        "https://mmil-recruitment-site.vercel.app/api/auth/google",
         { token: credentialResponse.credential }
       );
-        const {token , needsProfile} = res.data
+        const {token , needsProfile, userId} = res.data
         localStorage.setItem('token',token)
+        localStorage.setItem('userId', userId)
         if(needsProfile){
             navigate('/complete-profile')
         }
         else{
             toast.success("Logged in successfully ");
+            navigate('/')
         }
       
     } catch (err) {
