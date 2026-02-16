@@ -1,35 +1,66 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const DepartmentApplications = () => {
   const { department } = useParams();
   const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!department) return;
 
-    fetch(`http://localhost:5000/api/admin/applications/${department}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("API Response:", data);
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch(
+          `/api/admin/applications/${department}`, 
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.message || "Failed to fetch applications"
+          );
+        }
+
+        const data = await res.json();
         setApplications(data?.data || []);
-      })
-      .catch((err) => console.error("Fetch Error:", err));
+      } catch (err) {
+        setError(err.message);
+        toast.error(err.message); 
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
   }, [department, token]);
 
   return (
     <div>
       <h2>{department?.toUpperCase()} Applications</h2>
 
-      {applications.length === 0 ? (
+      {loading && <p>Loading...</p>}
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {!loading && !error && applications.length === 0 && (
         <p>No Applications Found</p>
-      ) : (
+      )}
+
+      {!loading &&
+        !error &&
         applications.map((app) => (
           <div
             key={app._id}
@@ -49,8 +80,7 @@ const DepartmentApplications = () => {
               <strong>Department:</strong> {app.department}
             </p>
           </div>
-        ))
-      )}
+        ))}
     </div>
   );
 };

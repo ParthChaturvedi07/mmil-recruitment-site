@@ -5,7 +5,7 @@ const AllApplications = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/applications", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/admin/applications`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +19,7 @@ const AllApplications = () => {
           throw new Error(data.message || "Failed to fetch applications");
         }
 
-        console.log("All Applications:", data);
+       
         return data;
       })
       .then((data) => {
