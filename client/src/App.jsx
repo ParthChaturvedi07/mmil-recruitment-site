@@ -17,7 +17,6 @@ import { API_ENDPOINTS } from "./config/api";
 /* Splash Screen Component  */
 
 const SplashScreen = () => {
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#FDF5E6]">
       <div className="relative w-[80vw] max-w-[429px] h-[429px] animate-fade-in">
@@ -36,7 +35,6 @@ const SplashScreen = () => {
 const StartScreen = ({ onStart }) => {
   return (
     <div className="fixed inset-0 bg-[#FDF5E6] flex flex-col items-center justify-center overflow-hidden font-['Montserrat']">
-
       {/* LIGHTBULB + VECTOR 1  */}
       <div className="absolute inset-0 pointer-events-none">
         <div
@@ -68,8 +66,26 @@ const StartScreen = ({ onStart }) => {
 
       {/*  VECTOR 2 STARS  */}
       <div className="absolute inset-0 pointer-events-none">
-        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "40px", left: "calc(50% - 410px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
-        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "675px", left: "calc(50% - 520px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
+        <img
+          src="/Vector 2.png"
+          alt="Star"
+          className="absolute w-[80px] h-auto"
+          style={{
+            top: "40px",
+            left: "calc(50% - 410px)",
+            filter: "sepia(1) saturate(5) hue-rotate(-30deg)",
+          }}
+        />
+        <img
+          src="/Vector 2.png"
+          alt="Star"
+          className="absolute w-[80px] h-auto"
+          style={{
+            top: "675px",
+            left: "calc(50% - 520px)",
+            filter: "sepia(1) saturate(5) hue-rotate(-30deg)",
+          }}
+        />
       </div>
 
       {/* BACKGROUND TEXT  */}
@@ -100,10 +116,7 @@ const StartScreen = ({ onStart }) => {
 
       {/*  MAIN CARD  */}
       <div className="z-10 bg-[#FFDED3] w-[85vw] max-w-[475px] h-[398px] rounded-[15px] shadow-sm text-center flex flex-col items-center justify-center border border-[#FFFFFF]/70">
-
-        <h2 className="text-[48px] font-black text-gray-900 mb-1">
-          MMIL
-        </h2>
+        <h2 className="text-[48px] font-black text-gray-900 mb-1">MMIL</h2>
 
         <p className="text-[18px] font-bold tracking-[0.05em] mb-12 uppercase">
           Let's Start
@@ -126,7 +139,7 @@ const StartScreen = ({ onStart }) => {
 const App = () => {
   // Stages: splash → startScreen → website
   const [stage, setStage] = useState("splash");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Splash shows for 2 sec
@@ -137,13 +150,25 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-
   // Start button click
   const handleStart = () => {
     setStage("website");
   };
 
   const location = useLocation();
+  const [toastPosition, setToastPosition] = useState("bottom-right");
+
+  useEffect(() => {
+    const handleResize = () => {
+      setToastPosition(window.innerWidth < 768 ? "top-center" : "bottom-right");
+    };
+
+    // Set initial position
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (stage === "website") {
@@ -153,7 +178,7 @@ const App = () => {
 
         try {
           const res = await axios.get(API_ENDPOINTS.CHECK_STATUS, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
 
           if (res.data.needsProfile) {
@@ -163,7 +188,7 @@ const App = () => {
           }
         } catch (error) {
           console.error("Auth check failed:", error);
-          // Optional: clear token if invalid? 
+          // Optional: clear token if invalid?
           // localStorage.removeItem("token");
         }
       };
@@ -171,7 +196,7 @@ const App = () => {
       checkAuth();
       // If we are already on website stage, we might just be landing there directly (e.g. refresh)
       // But actually, this app has a splash screen on every reload due to stage="splash" initial state.
-      // Wait, if users refresh, they see splash again. 
+      // Wait, if users refresh, they see splash again.
       // The current logic:
       // 1. Splash (2s) -> StartScreen
       // 2. Click Start -> Website
@@ -199,7 +224,7 @@ const App = () => {
   // }, [stage]);
 
   // We should remove this entirely or modify it.
-  // If I remove it, what happens? 
+  // If I remove it, what happens?
   // If I reload on /complete-profile:
   // Splash -> Start -> Click Start -> setStage("website").
   // If no navigation happens, where does it render?
@@ -236,7 +261,7 @@ const App = () => {
             {/* <Route path="/admin/:domainName" element={<DomainStudents />} /> */}
           </Routes>
 
-          <ToastContainer position="top-center" />
+          <ToastContainer position={toastPosition} />
         </>
       )}
     </>

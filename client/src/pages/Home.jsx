@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
+import { toast } from "react-toastify";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -34,12 +35,22 @@ const Home = () => {
       desc: "Personal interview and HR interview round to check your personality and coordination skills."
     },
     {
-      name: "Results",
+      name: "Result",
       status: "Final",
       color: "bg-[#FFF3DA]",
       desc: "Check Technical round results."
     },
   ];
+
+  const handleToast = (round) => {
+    if(round=="Result"){
+      toast.info("Result Yet to be Announced");
+    }
+    else{
+      console.log(round);
+      toast.info("Round Yet to be Started");
+    }
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-[#FDF5E6] flex flex-col items-center font-montserrat overflow-x-hidden">
@@ -108,6 +119,7 @@ const Home = () => {
               <div
                 key={index}
                 className={`${round.color} w-full min-h-[65px] md:h-[75px] py-2 px-4 md:px-6 rounded-2xl flex items-center shadow-sm border border-black/5 hover:scale-[1.02] transition-transform cursor-pointer relative`}
+                onClick={()=>{handleToast(round.name)}}
               >
                 <div className="flex flex-col items-center justify-center w-full text-center pr-6">
                   <span className="text-[8px] md:text-[10px] font-bold text-gray-600 uppercase tracking-tighter leading-none mb-1">
