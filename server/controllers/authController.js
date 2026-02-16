@@ -62,7 +62,7 @@ const googleAuth = async (req, res) => {
       userId: user._id,
       needsProfile: !user.isProfileComplete,
     });
-    
+
   } catch (error) {
     console.error("Google Auth Error:", error);
     res.status(401).json({ message: "Authentication failed" });
@@ -131,7 +131,7 @@ const registerWithEmail = async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    
+
     // Check if user already exists
     let user = await userModel.findOne({ email: normalizedEmail });
 
@@ -148,10 +148,10 @@ const registerWithEmail = async (req, res) => {
       await user.save();
 
       const token = signAppToken(user);
-      return res.status(200).json({ 
-        token, 
-        userId: user._id, 
-        needsProfile: !user.isProfileComplete 
+      return res.status(200).json({
+        token,
+        userId: user._id,
+        needsProfile: !user.isProfileComplete
       });
     }
 
@@ -166,10 +166,10 @@ const registerWithEmail = async (req, res) => {
     });
 
     const token = signAppToken(user);
-    return res.status(201).json({ 
-      token, 
-      userId: user._id, 
-      needsProfile: !user.isProfileComplete 
+    return res.status(201).json({
+      token,
+      userId: user._id,
+      needsProfile: !user.isProfileComplete
     });
 
   } catch (err) {
@@ -241,9 +241,19 @@ const completeProfile = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("Logout Error:", err);
+    res.status(500).json({ message: "Logout failed" });
+  }
+};
+
 export {
   googleAuth,
   registerWithEmail,
   loginWithEmail,
   completeProfile,
+  logout
 };
