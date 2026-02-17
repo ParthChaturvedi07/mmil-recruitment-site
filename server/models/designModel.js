@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const DesignSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true
+    },
     figmaLink: {
       type: String,
       required: true,

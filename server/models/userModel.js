@@ -71,6 +71,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "selected", "rejected"],
     default: "pending"
+  },
+  score: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

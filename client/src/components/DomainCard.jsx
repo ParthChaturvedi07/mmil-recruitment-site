@@ -1,15 +1,16 @@
 import { useNavigate } from "react-router-dom";
 
-const DomainCard = ({ title, count, gradient }) => {
+const DomainCard = ({ title, count, gradient, domainKey }) => {
 
-    const navigate = useNavigate()
-    const handleClick =() => {
-         navigate(`/admin/${title.toLowerCase()
-}`)
-    }
+  const navigate = useNavigate()
+  const handleClick = () => {
+    // Use domainKey if provided, otherwise fallback to lowercase title
+    const route = domainKey ? domainKey : title.toLowerCase();
+    navigate(`/admin/${route}`)
+  }
   return (
     <div
-    onClick={handleClick}
+      onClick={handleClick}
       className={`
         ${gradient}
         rounded-2xl

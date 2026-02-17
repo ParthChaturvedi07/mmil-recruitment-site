@@ -17,7 +17,8 @@ const getMissingFields = (user) => {
   if (!user.branch) missingFields.push("branch");
   if (!user.department) missingFields.push("department");
   if (!user.admissionNumber) missingFields.push("admissionNumber");
-  if (!user.universityRoll) missingFields.push("universityRoll");
+  // Defensive: If roll no is present but not strictly numeric, treat as missing so bot asks again
+  if (!user.universityRoll || !/^\d+$/.test(user.universityRoll)) missingFields.push("universityRoll");
   if (!user.phone) missingFields.push("phone");
 
   if (user.department === "designing") {
@@ -26,7 +27,7 @@ const getMissingFields = (user) => {
     if (!user.links?.github) missingFields.push("github");
   }
 
-  if (user.year === "2" && !user.resume) missingFields.push("resume");
+  if (!user.resume) missingFields.push("resume");
   return missingFields;
 };
 
@@ -41,7 +42,7 @@ const getQuestionForField = (field, userName) => {
     case "admissionNumber":
       return "Could you share your admission number? (Example: 24cseaiml043) (or type 'none' if you are not an AKTU student)";
     case "universityRoll":
-      return "Great—now please enter your university roll number (8–17 characters) (for both uni and AKTU).";
+      return "Great—now please enter your university roll number (8–17 digits) (for both uni and AKTU).";
     case "phone":
       return "Now, for contact—please share your phone number (10 digits).";
     case "github":
@@ -87,10 +88,10 @@ const validateForField = (field, message, user) => {
   }
 
   if (field === "universityRoll") {
-    // Check for alphanumeric and length 8-17
-    const uniMatch = v.match(/\b[a-zA-Z0-9]{8,17}\b/);
+    // Strictly numeric
+    const uniMatch = v.match(/\b\d{8,17}\b/);
     if (!uniMatch) {
-      return { field: "universityRoll", message: "Please enter a valid university roll number (8–17 characters, letters and numbers allowed)." };
+      return { field: "universityRoll", message: "Please enter a valid university roll number (8–17 digits)." };
     }
   }
 
@@ -230,9 +231,9 @@ const extractUserInfo = (message, user) => {
     }
   }
 
-  // 4. EXTRACT UNIVERSITY ROLL (Alphanumeric 8-17 chars)
+  // 4. EXTRACT UNIVERSITY ROLL (Strictly numeric 8-17 chars)
   if (!user.universityRoll) {
-    const uniRollPattern = /\b([a-zA-Z0-9]{8,17})\b/;
+    const uniRollPattern = /\b(\d{8,17})\b/;
     const uniMatch = message.match(uniRollPattern);
     if (uniMatch) {
       // Additional check to avoid confusing with phone numbers if it's purely numeric and 10 digits
@@ -432,6 +433,9 @@ chatbotRouter.post("/chat", async (req, res) => {
     if (updatedFields.length > 0) {
       try {
         await user.save();
+        // Notify admin of update
+        const { emitAdminUpdate } = await import("../utils/socket.js");
+        emitAdminUpdate({ userId: user._id, type: "profile_updated", updatedFields });
       } catch (saveErr) {
         if (saveErr?.name === "ValidationError") {
           const validationErrors = Object.keys(saveErr.errors || {}).map((field) => ({
@@ -568,7 +572,7 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
     // 7. Check Completion
     const isComplete = user.year && user.branch && user.department &&
       user.admissionNumber && user.universityRoll && user.phone &&
-      (user.year !== "2" || user.resume) &&
+      user.resume &&
       (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
 
     if (isComplete && !user.isProfileComplete) {
@@ -627,7 +631,7 @@ chatbotRouter.post("/upload-resume", authMiddleware, upload.single("resume"), as
     // Check if everything else is done
     const isComplete = user.year && user.branch && user.department &&
       user.admissionNumber && user.universityRoll && user.phone &&
-      (user.year !== "2" || user.resume) &&
+      user.resume &&
       (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
 
     if (isComplete) {

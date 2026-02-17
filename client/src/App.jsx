@@ -6,8 +6,9 @@ import Chatbot from "./pages/Chatbot";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PublicRoute from "./components/PublicRoute";
-// import AdminPage from "./pages/AdminPage";
-// import DomainStudents from "./pages/DomainStudents";
+import AdminPage from "./pages/AdminPage";
+import AllApplications from "./pages/admin/AllApplications";
+import DepartmentApplications from "./pages/admin/DepartmentApplications";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -257,8 +258,9 @@ const App = () => {
               <Route path="/register" element={<Register />} />
             </Route>
             <Route path="/complete-profile" element={<Chatbot />} />
-            {/* <Route path="/admin" element={<AdminPage />} /> */}
-            {/* <Route path="/admin/:domainName" element={<DomainStudents />} /> */}
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/students" element={<AllApplications />} />
+            <Route path="/admin/:domain" element={<DepartmentApplications />} />
           </Routes>
 
           <ToastContainer position={toastPosition} />

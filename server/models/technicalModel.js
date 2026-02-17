@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const technicalSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        required: true
+    },
     githubLink:{ 
         type: String,
     required: true},

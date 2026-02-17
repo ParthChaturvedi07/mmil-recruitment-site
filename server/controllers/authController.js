@@ -42,6 +42,8 @@ const googleAuth = async (req, res) => {
       if (!user.googleId) {
         user.googleId = sub;
         await user.save();
+        const { emitAdminUpdate } = await import("../utils/socket.js");
+        emitAdminUpdate({ userId: user._id, type: "user_linked_google" });
       }
     } else {
       // SCENARIO B: New User. Create them.
@@ -52,6 +54,8 @@ const googleAuth = async (req, res) => {
         onboardingStep: 0,
         isProfileComplete: false
       });
+      const { emitAdminUpdate } = await import("../utils/socket.js");
+      emitAdminUpdate({ userId: user._id, type: "new_registration", method: "google" });
     }
 
     // 3. Generate Token
@@ -148,6 +152,9 @@ const registerWithEmail = async (req, res) => {
       onboardingStep: 0,
       isProfileComplete: false,
     });
+
+    const { emitAdminUpdate } = await import("../utils/socket.js");
+    emitAdminUpdate({ userId: user._id, type: "new_registration", method: "email" });
 
     const token = signAppToken(user);
     return res.status(201).json({
