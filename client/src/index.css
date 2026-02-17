@@ -1,26 +1,20 @@
-/* client/src/index.css */
-:root {
-  font-family: 'Poppins', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  background-color: #FFF0E5; /* Match your peach background */
-}
+@import "tailwindcss";
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
-  display: block; /* Fixes default flex behavior in some templates */
-}
+@theme {
+  /* Matching the exact cream background from your Figma */
+  --color-figma-cream: #FDF5E6;
+  
 
-/* CRITICAL FIX: Make the React Root fill the page */
-#root {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centers the App Container */
-  justify-content: flex-start;
-  margin: 0 auto;
+  /* Smooth animations */
+  --keyframes-fade-in: {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  };
+  --animation-fade-in: fade-in 0.8s ease-out;
+
+  --keyframes-fade-out: {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  };
+  --animation-fade-out: fade-out 0.5s ease-in forwards;
 }
