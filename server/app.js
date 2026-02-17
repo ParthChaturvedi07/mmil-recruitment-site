@@ -3,14 +3,11 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import { ENV } from "./config/env.js";
-
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 import authRouter from "./routes/authRoute.js";
 import profileRouter from "./routes/profileUpdateRoute.js";
 import chatbotRouter from "./routes/chatbotRoute.js";
-// import adminRouter from "./routes/adminRoute.js";
-
 import webDevRouter from "./routes/webDevRoute.js";
 import technicalRouter from "./routes/technicalRoute.js";
 import designRouter from "./routes/designRoute.js";
@@ -18,48 +15,60 @@ import applicationsRouter from "./routes/applicationsRoute.js";
 
 const app = express();
 
-// Security Headers
-app.use(helmet({
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+// Allowed origins — supports string or array from ENV
+const allowedOrigins = Array.isArray(ENV.ALLOWED_ORIGINS)
+  ? ENV.ALLOWED_ORIGINS
+  : typeof ENV.ALLOWED_ORIGINS === "string"
+  ? ENV.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:5173"];
 
-// Hardened CORS
-app.use(cors({
-  origin: ENV.ALLOWED_ORIGINS,
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      callback(new Error(`CORS policy: origin ${origin} not allowed`));
+    }
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+// Security Headers
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: false, // disabled for Google OAuth popup support
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
+// Handle preflight BEFORE all routes
+app.options("*", cors(corsOptions));
+
+// Apply CORS globally
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-// Auth routes
+// Routes
 app.use("/api/auth", authRouter);
-
-app.use("/api/auth",authRouter)
-app.use("/api/auth",profileRouter)
-// app.use("/api/auth",adminRouter)
-app.use("/api/chat",chatbotRouter)
-// Profile routes
+app.use("/api/chat", chatbotRouter);
 app.use("/api/profile", profileRouter);
-
-// Admin routes
-app.use("/api/admin", applicationsRouter);  
-
-// Domain routes
+app.use("/api/admin", applicationsRouter);
 app.use("/api/webdev", webDevRouter);
 app.use("/api/technical", technicalRouter);
 app.use("/api/design", designRouter);
-
-// Static uploads
 app.use("/uploads", express.static("uploads"));
 
-app.get("/", (req, res) => {
-  res.send("server started");
-});
+app.get("/", (req, res) => res.send("server started"));
 
 // 404 handler
 app.use((req, res) => {
@@ -70,4 +79,3 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 export default app;
-
