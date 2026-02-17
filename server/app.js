@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import morgan from "morgan";
 import { ENV } from "./config/env.js";
 
@@ -17,9 +18,20 @@ import applicationsRouter from "./routes/applicationsRoute.js";
 
 const app = express();
 
-app.use(cors({
-  origin: ENV.ALLOWED_ORIGINS
+// Security Headers
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+// Hardened CORS
+app.use(cors({
+  origin: ENV.ALLOWED_ORIGINS,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
