@@ -27,7 +27,7 @@ const getMissingFields = (user) => {
     if (!user.links?.github) missingFields.push("github");
   }
 
-  if (!user.resume) missingFields.push("resume");
+  if (user.year === "2" && !user.resume) missingFields.push("resume");
   return missingFields;
 };
 
@@ -366,7 +366,7 @@ chatbotRouter.post("/chat", async (req, res) => {
       addMessage(userId, "assistant", reply);
       return res.json({
         reply,
-        profileComplete: false,
+        profileComplete: !nextQuestion,
         updatedFields: [],
         validationErrors: [],
       });
@@ -570,10 +570,7 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
     addMessage(userId, "assistant", text);
 
     // 7. Check Completion
-    const isComplete = user.year && user.branch && user.department &&
-      user.admissionNumber && user.universityRoll && user.phone &&
-      user.resume &&
-      (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
+    const isComplete = getMissingFields(user).length === 0;
 
     if (isComplete && !user.isProfileComplete) {
       user.isProfileComplete = true;
@@ -582,7 +579,7 @@ Respond to the user naturally. If data was just saved, acknowledge it and move t
 
     res.json({
       reply: text,
-      profileComplete: !!isComplete,
+      profileComplete: isComplete,
       updatedFields: updatedFields,
       validationErrors: []
     });
@@ -629,10 +626,8 @@ chatbotRouter.post("/upload-resume", authMiddleware, upload.single("resume"), as
     if (!user) return res.status(404).json({ error: "User not found" });
 
     // Check if everything else is done
-    const isComplete = user.year && user.branch && user.department &&
-      user.admissionNumber && user.universityRoll && user.phone &&
-      user.resume &&
-      (user.department === "designing" ? (user.links?.figma || user.links?.behance) : user.links?.github);
+    // Check if everything else is done
+    const isComplete = getMissingFields(user).length === 0;
 
     if (isComplete) {
       user.isProfileComplete = true;

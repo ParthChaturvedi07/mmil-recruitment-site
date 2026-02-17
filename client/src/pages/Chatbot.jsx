@@ -58,6 +58,12 @@ function Chatbot() {
         ) {
           toast.success(`Updated: ${res.data.updatedFields.join(", ")}`);
         }
+
+        // Check if profile is complete
+        if (res.data.profileComplete) {
+          toast.success("Profile is already complete!");
+          setTimeout(() => navigate("/"), 2500);
+        }
       } catch (error) {
         console.error("Failed to start conversation:", error);
         toast.error(
@@ -138,7 +144,7 @@ function Chatbot() {
       ) {
         toast.error(
           res.data.validationErrors[0].message ||
-            "Please enter correct details",
+          "Please enter correct details",
         );
       }
 
@@ -214,18 +220,18 @@ function Chatbot() {
         </div>
         {/* 3. DECORATIVE ELEMENTS  */}
         <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute flex flex-col items-center" style={{ top: "143px", right: "calc(50% - 620px)" }}>
-          <img src="/light-bulb 1.png" alt="Bulb" className="w-[110px] h-auto object-contain z-20" />
+          <div className="absolute flex flex-col items-center" style={{ top: "143px", right: "calc(50% - 620px)" }}>
+            <img src="/light-bulb 1.png" alt="Bulb" className="w-[110px] h-auto object-contain z-20" />
             <div className="absolute top-[110px] right-[8%] z-0">
-            <img src="/Vector 1.png" alt="Line Decoration" style={{ width: "375px", height: "210px" }} />
+              <img src="/Vector 1.png" alt="Line Decoration" style={{ width: "375px", height: "210px" }} />
             </div>
           </div>
         </div>
 
         {/* 5. STAR DECORATIONS */}
         <div className="absolute inset-0 pointer-events-none">
-        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto " style={{ top: "80px", left: "calc(50% - 430px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
-        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "640px", left: "calc(50% - -360px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
+          <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto " style={{ top: "80px", left: "calc(50% - 430px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
+          <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "640px", left: "calc(50% - -360px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
         </div>
         <div className="w-full max-w-3xl flex-1 flex flex-col min-h-0 bg-[#FFE0D4] rounded-lg shadow-lg overflow-hidden my-[10vh]">
           <div className="bg-[#72341E] text-white p-4">
@@ -242,11 +248,10 @@ function Chatbot() {
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
-                    message.role === "user"
+                  className={`max-w-xs px-4 py-2 rounded-lg ${message.role === "user"
                       ? "bg-[#FDF5E6] text-[#72341E]"
                       : "bg-[#EAEAEA] text-gray-600"
-                  }`}
+                    }`}
                 >
                   {message.content}
                 </div>

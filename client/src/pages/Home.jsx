@@ -43,10 +43,11 @@ const Home = () => {
   ];
 
   const handleToast = (round) => {
-    if(round=="Result"){
+    if (round == "Result") {
       toast.info("Result Yet to be Announced");
-    }
-    else{
+    } else if (round === "Technical Round") {
+      navigate('/task/webdev');
+    } else {
       console.log(round);
       toast.info("Round Yet to be Started");
     }
@@ -119,7 +120,7 @@ const Home = () => {
               <div
                 key={index}
                 className={`${round.color} w-full min-h-[65px] md:h-[75px] py-2 px-4 md:px-6 rounded-2xl flex items-center shadow-sm border border-black/5 hover:scale-[1.02] transition-transform cursor-pointer relative`}
-                onClick={()=>{handleToast(round.name)}}
+                onClick={() => { handleToast(round.name) }}
               >
                 <div className="flex flex-col items-center justify-center w-full text-center pr-6">
                   <span className="text-[8px] md:text-[10px] font-bold text-gray-600 uppercase tracking-tighter leading-none mb-1">

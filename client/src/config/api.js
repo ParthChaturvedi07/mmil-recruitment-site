@@ -15,6 +15,12 @@ export const API_ENDPOINTS = {
 
   // Admin endpoints
   APPLICATIONS: `${API_BASE_URL}/api/admin/applications`,
+
+  // Domain endpoints
+  WEBDEV_SUBMIT: `${API_BASE_URL}/api/webdev/submit`,
+  DESIGN_SUBMIT: `${API_BASE_URL}/api/design/add`,
+  PROGRAMMING_SUBMIT: `${API_BASE_URL}/api/programming/submit`,
+  TECHNICAL_SUBMIT: `${API_BASE_URL}/api/technical/submit`,
 };
 
 export default API_BASE_URL;

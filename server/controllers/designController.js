@@ -2,13 +2,15 @@ import designModel from "../models/designModel.js";
 
 const addDesignProject = async (req, res) => {
   try {
-    const { figmaLink, githubLink } = req.body;
+    const { phoneNumber, figmaLink, githubLink } = req.body;
 
-    if (!figmaLink) {
-      return res.status(400).json({ message: "Figma link is required." });
+    if (!phoneNumber || !figmaLink) {
+      return res.status(400).json({ message: "Phone Number and Figma link are required." });
     }
 
     const newDesign = await designModel.create({
+      userId: req.user.id,
+      phoneNumber,
       figmaLink,
       githubLink,
     });

@@ -3,13 +3,15 @@ import technicalModel from '../models/technicalModel.js';
 
 const submitTechnicalProject = async (req, res) => {
   try {
-    const { githubLink, projectLink } = req.body;
+    const { phoneNumber, githubLink, projectLink } = req.body;
 
-    if (!githubLink || !projectLink) {
-      return res.status(400).json({ message: "Both GitHub link and project link are required." });
+    if (!phoneNumber || !githubLink || !projectLink) {
+      return res.status(400).json({ message: "Phone number, GitHub link, and project link are all required." });
     }
 
     const newProject = await technicalModel.create({
+      userId: req.user.id,
+      phoneNumber,
       githubLink,
       projectLink,
     });

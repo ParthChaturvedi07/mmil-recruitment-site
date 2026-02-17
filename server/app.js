@@ -13,12 +13,13 @@ import chatbotRouter from "./routes/chatbotRoute.js";
 import webDevRouter from "./routes/webDevRoute.js";
 import technicalRouter from "./routes/technicalRoute.js";
 import designRouter from "./routes/designRoute.js";
+import programmingRouter from "./routes/programmingRoute.js";
 import applicationsRouter from "./routes/applicationsRoute.js";
 
 const app = express();
 
 app.use(cors({
-  origin: ["https://mmil.club", "http://www.mmil.club", "https://mmil-recruitment.vercel.app"]
+  origin: ["https://mmil.club", "http://www.mmil.club", "https://mmil-recruitment.vercel.app", "http://localhost:5173", "http://127.0.0.1:5173"]
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,20 +28,21 @@ app.use(morgan("dev"));
 // Auth routes
 app.use("/api/auth", authRouter);
 
-app.use("/api/auth",authRouter)
-app.use("/api/auth",profileRouter)
+app.use("/api/auth", authRouter)
+app.use("/api/auth", profileRouter)
 // app.use("/api/auth",adminRouter)
-app.use("/api/chat",chatbotRouter)
+app.use("/api/chat", chatbotRouter)
 // Profile routes
 app.use("/api/profile", profileRouter);
 
 // Admin routes
-app.use("/api/admin", applicationsRouter);  
+app.use("/api/admin", applicationsRouter);
 
 // Domain routes
 app.use("/api/webdev", webDevRouter);
 app.use("/api/technical", technicalRouter);
 app.use("/api/design", designRouter);
+app.use("/api/programming", programmingRouter);
 
 // Static uploads
 app.use("/uploads", express.static("uploads"));

@@ -3,15 +3,16 @@ import webDevModel from "../models/webDevModel.js";
 
 const submitWebDevProject = async (req, res) => {
   try {
-    const { hostedSiteLink, githubRepoLink } = req.body;
+    const { phoneNumber, hostedSiteLink, githubRepoLink } = req.body;
 
-    if (!hostedSiteLink || !githubRepoLink) {
-      return res.status(400).json({ message: "Both hosted site link and GitHub repo link are required" });
+    if (!phoneNumber || !hostedSiteLink || !githubRepoLink) {
+      return res.status(400).json({ message: "Phone number, hosted site link and GitHub repo link are required" });
     }
 
     // Save project
     const project = await webDevModel.create({
-      userId: req.user.id, 
+      userId: req.user.id,
+      phoneNumber,
       hostedSiteLink,
       githubRepoLink
     });

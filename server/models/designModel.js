@@ -7,6 +7,10 @@ const DesignSchema = new mongoose.Schema(
       ref: "user",
       required: true
     },
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
     figmaLink: {
       type: String,
       required: true,

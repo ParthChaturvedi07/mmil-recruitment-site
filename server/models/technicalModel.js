@@ -6,12 +6,17 @@ const technicalSchema = new mongoose.Schema({
         ref: "user",
         required: true
     },
-    githubLink:{ 
+    phoneNumber: {
         type: String,
-    required: true},
-    projectLink:{
-      type:  String,
-      required:true
+        required: true,
+    },
+    githubLink: {
+        type: String,
+        required: true
+    },
+    projectLink: {
+        type: String,
+        required: true
     }
 })
 

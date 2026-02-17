@@ -10,8 +10,9 @@ import designMiddleware from "../middlewares/designMiddleware.js";
 const designRouter = express.Router();
 
 designRouter.post(
-  "/add-design",
+  "/add",
   authMiddleware,
+  designMiddleware,
 
   addDesignProject,
 );
