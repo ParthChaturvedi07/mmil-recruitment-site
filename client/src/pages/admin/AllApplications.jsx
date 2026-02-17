@@ -34,6 +34,13 @@ const AllApplications = () => {
     };
 
     const handleStatusChange = async (studentId, field, value) => {
+        let prevValue;
+        setStudents(prev => {
+            const student = prev.find(s => s._id === studentId);
+            if (student) prevValue = student[field];
+            return prev.map(s => s._id === studentId ? { ...s, [field]: value } : s);
+        });
+
         try {
             const response = await fetch(`${API_BASE}/api/admin/students/${studentId}/status`, {
                 method: "PUT",
@@ -45,13 +52,13 @@ const AllApplications = () => {
             });
 
             if (!response.ok) {
+                // Rollback on failure
+                setStudents(prev => prev.map(s => s._id === studentId ? { ...s, [field]: prevValue } : s));
                 throw new Error("Failed to update status");
             }
-
-            // Real-time update via Socket.io will trigger refetch, 
-            // but we can also update local state for immediate feedback
-            setStudents(prev => prev.map(s => s._id === studentId ? { ...s, [field]: value } : s));
         } catch (err) {
+            // Rollback on error
+            setStudents(prev => prev.map(s => s._id === studentId ? { ...s, [field]: prevValue } : s));
             console.error("Status update error:", err.message);
             alert("Failed to update status. Please try again.");
         }
@@ -182,8 +189,11 @@ const AllApplications = () => {
                                             <td className="px-6 py-4 text-sm">
                                                 <input
                                                     type="number"
-                                                    value={student.score || 0}
-                                                    onChange={(e) => handleStatusChange(student._id, "score", parseInt(e.target.value) || 0)}
+                                                    defaultValue={student.score || 0}
+                                                    onBlur={(e) => handleStatusChange(student._id, "score", parseInt(e.target.value) || 0)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") e.target.blur();
+                                                    }}
                                                     className="w-16 px-2 py-1 border rounded text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none"
                                                 />
                                             </td>
