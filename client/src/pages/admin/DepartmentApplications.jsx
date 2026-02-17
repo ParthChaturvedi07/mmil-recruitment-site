@@ -1,6 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { io } from "socket.io-client";
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+const isSafeUrl = (url) => {
+    if (!url) return false;
+    try {
+        const parsed = new URL(url);
+        return ["http:", "https:", "mailto:"].includes(parsed.protocol);
+    } catch {
+        return false;
+    }
+};
 
 const DepartmentApplications = () => {
     const { domain } = useParams();
@@ -8,6 +19,7 @@ const DepartmentApplications = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const token = localStorage.getItem("token");
+    const fetchStudentsRef = useRef();
 
     // Domain mapping: backend value -> display name
     const domainDisplayNames = {
@@ -17,31 +29,59 @@ const DepartmentApplications = () => {
         technical: "Technical"
     };
 
-    useEffect(() => {
+    const fetchStudents = async () => {
         if (!domain || !token) return;
-
-        const fetchStudents = async () => {
-            try {
-                const response = await fetch(`${API_BASE}/api/admin/domain/${domain}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                if (!response.ok) {
-                    if (response.status === 403) throw new Error("Access denied. Admins only.");
-                    throw new Error("Failed to fetch students");
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/domain/${domain}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-                const data = await response.json();
-                setStudents(data);
-                setLoading(false);
-            } catch (err) {
-                setError(err.message);
-                setLoading(false);
+            });
+            if (!response.ok) {
+                if (response.status === 403) throw new Error("Access denied. Admins only.");
+                throw new Error("Failed to fetch students");
             }
-        };
+            const data = await response.json();
+            setStudents(data);
+            setLoading(false);
+        } catch (err) {
+            setError(err.message);
+            setLoading(false);
+        }
+    };
 
+    // Keep ref updated with the latest fetch function
+    useEffect(() => {
+        fetchStudentsRef.current = fetchStudents;
+    });
+
+    useEffect(() => {
+        setLoading(true);
+        setStudents([]);
+        setError(null);
         fetchStudents();
     }, [domain, token]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        const socket = io(API_BASE, {
+            auth: {
+                token: token
+            }
+        });
+
+        socket.on("admin:update", (data) => {
+            console.log("Real-time update received in department list:", data);
+            if (fetchStudentsRef.current) {
+                fetchStudentsRef.current();
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [token]);
 
     const handleStatusChange = async (studentId, field, value) => {
         let prevValue;
@@ -133,7 +173,11 @@ const DepartmentApplications = () => {
                                             <td className="px-6 py-4 text-sm">
                                                 <input
                                                     type="number"
-                                                    defaultValue={student.score || 0}
+                                                    value={student.score || 0}
+                                                    onChange={(e) => {
+                                                        const newVal = parseInt(e.target.value) || 0;
+                                                        setStudents(prev => prev.map(s => s._id === student._id ? { ...s, score: newVal } : s));
+                                                    }}
                                                     onBlur={(e) => handleStatusChange(student._id, "score", parseInt(e.target.value) || 0)}
                                                     onKeyDown={(e) => {
                                                         if (e.key === "Enter") e.target.blur();
@@ -186,10 +230,10 @@ const DepartmentApplications = () => {
                                                 </select>
                                             </td>
                                             <td className="px-6 py-4 text-sm space-x-2">
-                                                {student.links?.github && (
+                                                {student.links?.github && isSafeUrl(student.links.github) && (
                                                     <a href={student.links.github} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 font-medium">GitHub</a>
                                                 )}
-                                                {student.links?.figma && (
+                                                {student.links?.figma && isSafeUrl(student.links.figma) && (
                                                     <a href={student.links.figma} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 font-medium">Figma</a>
                                                 )}
                                             </td>

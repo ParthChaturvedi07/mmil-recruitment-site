@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import { ENV } from "./config/env.js";
 
 import { errorHandler } from "./middlewares/error.middleware.js";
 
@@ -16,7 +17,9 @@ import applicationsRouter from "./routes/applicationsRoute.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: ENV.ALLOWED_ORIGINS
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));

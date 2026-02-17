@@ -1,7 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+const isSafeUrl = (url) => {
+    if (!url) return false;
+    try {
+        const parsed = new URL(url);
+        return ["http:", "https:", "mailto:"].includes(parsed.protocol);
+    } catch {
+        return false;
+    }
+};
 
 const AllApplications = () => {
     const [students, setStudents] = useState([]);
@@ -11,6 +21,7 @@ const AllApplications = () => {
     const [department, setDepartment] = useState("all");
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
+    const fetchStudentsRef = useRef();
 
     const fetchStudents = async () => {
         try {
@@ -32,6 +43,11 @@ const AllApplications = () => {
             setLoading(false);
         }
     };
+
+    // Keep ref updated with the latest fetch function
+    useEffect(() => {
+        fetchStudentsRef.current = fetchStudents;
+    });
 
     const handleStatusChange = async (studentId, field, value) => {
         let prevValue;
@@ -70,20 +86,33 @@ const AllApplications = () => {
             setLoading(false);
             return;
         }
+        setLoading(true);
+        setStudents([]);
+        setError(null);
         fetchStudents();
+    }, [department, token]); // Refetch on filter change or token change
 
-        // Initialize WebSocket
-        const socket = io(API_BASE);
+    useEffect(() => {
+        if (!token) return;
+
+        // Initialize WebSocket with authentication
+        const socket = io(API_BASE, {
+            auth: {
+                token: token
+            }
+        });
 
         socket.on("admin:update", (data) => {
             console.log("Real-time update received in student list:", data);
-            fetchStudents(); // Refetch students on any update
+            if (fetchStudentsRef.current) {
+                fetchStudentsRef.current(); // Refetch using latest search/filters
+            }
         });
 
         return () => {
             socket.disconnect();
         };
-    }, [department, token]); // Refetch on filter change or token change
+    }, [token]); // Re-initialize only if token changes
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -189,7 +218,11 @@ const AllApplications = () => {
                                             <td className="px-6 py-4 text-sm">
                                                 <input
                                                     type="number"
-                                                    defaultValue={student.score || 0}
+                                                    value={student.score || 0}
+                                                    onChange={(e) => {
+                                                        const newVal = parseInt(e.target.value) || 0;
+                                                        setStudents(prev => prev.map(s => s._id === student._id ? { ...s, score: newVal } : s));
+                                                    }}
                                                     onBlur={(e) => handleStatusChange(student._id, "score", parseInt(e.target.value) || 0)}
                                                     onKeyDown={(e) => {
                                                         if (e.key === "Enter") e.target.blur();
@@ -245,10 +278,10 @@ const AllApplications = () => {
                                                 </select>
                                             </td>
                                             <td className="px-6 py-4 text-sm space-x-2">
-                                                {student.links?.github && (
+                                                {student.links?.github && isSafeUrl(student.links.github) && (
                                                     <a href={student.links.github} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 font-medium">GitHub</a>
                                                 )}
-                                                {student.links?.figma && (
+                                                {student.links?.figma && isSafeUrl(student.links.figma) && (
                                                     <a href={student.links.figma} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 font-medium">Figma</a>
                                                 )}
                                             </td>

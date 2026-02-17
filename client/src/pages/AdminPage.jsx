@@ -54,8 +54,12 @@ const AdminPage = () => {
         if (token) {
             fetchStats();
 
-            // Initialize WebSocket
-            const socket = io(API_BASE);
+            // Initialize WebSocket with authentication
+            const socket = io(API_BASE, {
+                auth: {
+                    token: token
+                }
+            });
 
             socket.on("admin:update", (data) => {
                 console.log("Real-time update received:", data);

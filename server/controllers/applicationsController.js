@@ -1,5 +1,7 @@
 import userModel from '../models/userModel.js';
 
+const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export const getStats = async (req, res) => {
   try {
     const totalStudents = await userModel.countDocuments({ role: "student" });
@@ -25,7 +27,7 @@ export const getStudentsByDomain = async (req, res) => {
     const students = await userModel.find({
       role: "student",
       department: domain
-    });
+    }).select('-passwordHash -googleId -__v');
 
     res.json(students);
   } catch (error) {
@@ -43,15 +45,18 @@ export const getAllStudents = async (req, res) => {
     }
 
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { admissionNumber: { $regex: search, $options: "i" } },
-        { universityRoll: { $regex: search, $options: "i" } }
+        { name: { $regex: escapedSearch, $options: "i" } },
+        { email: { $regex: escapedSearch, $options: "i" } },
+        { admissionNumber: { $regex: escapedSearch, $options: "i" } },
+        { universityRoll: { $regex: escapedSearch, $options: "i" } }
       ];
     }
 
-    const students = await userModel.find(query).sort({ createdAt: -1 });
+    const students = await userModel.find(query)
+      .select('-passwordHash -googleId -__v')
+      .sort({ createdAt: -1 });
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -71,7 +76,7 @@ export const updateStudentStatus = async (req, res) => {
         ...(hrStatus && { hrStatus }),
         ...(score !== undefined && { score }),
       },
-      { new: true }
+      { new: true, runValidators: true, context: 'query' }
     );
 
     if (!updatedUser) {
