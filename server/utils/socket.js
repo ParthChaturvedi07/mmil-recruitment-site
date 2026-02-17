@@ -31,6 +31,6 @@ export const getIo = () => {
 export const emitAdminUpdate = (data) => {
   if (io) {
     console.log("Emitting admin:update event");
-    io.emit("admin:update", data);
+    io.to("admin").emit("admin:update", data);
   }
 };

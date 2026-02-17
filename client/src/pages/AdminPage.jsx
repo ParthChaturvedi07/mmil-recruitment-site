@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 import DomainCard from "../components/DomainCard";
 
 const AdminPage = () => {
@@ -29,7 +30,7 @@ const AdminPage = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/admin/stats", {
+            const response = await fetch(`${API_BASE}/api/admin/stats`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -54,7 +55,7 @@ const AdminPage = () => {
             fetchStats();
 
             // Initialize WebSocket
-            const socket = io("http://localhost:5000");
+            const socket = io(API_BASE);
 
             socket.on("admin:update", (data) => {
                 console.log("Real-time update received:", data);

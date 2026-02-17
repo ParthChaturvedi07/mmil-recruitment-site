@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 const DepartmentApplications = () => {
     const { domain } = useParams();
@@ -21,7 +22,7 @@ const DepartmentApplications = () => {
 
         const fetchStudents = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/admin/domain/${domain}`, {
+                const response = await fetch(`${API_BASE}/api/admin/domain/${domain}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -44,7 +45,7 @@ const DepartmentApplications = () => {
 
     const handleStatusChange = async (studentId, field, value) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/admin/students/${studentId}/status`, {
+            const response = await fetch(`${API_BASE}/api/admin/students/${studentId}/status`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -185,7 +186,7 @@ const DepartmentApplications = () => {
                                             <td className="px-6 py-4 text-sm">
                                                 {student.resume ? (
                                                     <a
-                                                        href={`http://localhost:5000/${student.resume}`}
+                                                        href={`${API_BASE}/${student.resume}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full hover:bg-blue-700 shadow-sm transition-all"

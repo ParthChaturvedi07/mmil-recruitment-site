@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useState, useEffect } from "react";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 const AllApplications = () => {
     const [students, setStudents] = useState([]);
@@ -14,7 +15,7 @@ const AllApplications = () => {
     const fetchStudents = async () => {
         try {
             const query = new URLSearchParams({ search, department }).toString();
-            const response = await fetch(`http://localhost:5000/api/admin/students?${query}`, {
+            const response = await fetch(`${API_BASE}/api/admin/students?${query}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -34,7 +35,7 @@ const AllApplications = () => {
 
     const handleStatusChange = async (studentId, field, value) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/admin/students/${studentId}/status`, {
+            const response = await fetch(`${API_BASE}/api/admin/students/${studentId}/status`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -65,7 +66,7 @@ const AllApplications = () => {
         fetchStudents();
 
         // Initialize WebSocket
-        const socket = io("http://localhost:5000");
+        const socket = io(API_BASE);
 
         socket.on("admin:update", (data) => {
             console.log("Real-time update received in student list:", data);
@@ -244,7 +245,7 @@ const AllApplications = () => {
                                             <td className="px-6 py-4 text-sm">
                                                 {student.resume ? (
                                                     <a
-                                                        href={`http://localhost:5000/${student.resume}`}
+                                                        href={`${API_BASE}/${student.resume}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full hover:bg-blue-700 shadow-sm transition-all"
