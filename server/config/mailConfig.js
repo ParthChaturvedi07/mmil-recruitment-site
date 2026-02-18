@@ -1,32 +1,17 @@
-import { createTransport } from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 import { OTP_EXPIRES_MIN } from "./appConfig.js";
-import dns from "dns";
-
-dns.setDefaultResultOrder("ipv4first");
-
 
 dotenv.config();
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export const sendMail = async (otp) => {
   try {
-    const transport = createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.MAILER_EMAIL,
-        pass: process.env.MAILER_PASSWORD,
-      },
-      tls: {
-        family: 4, // 👈 FORCE IPv4
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.MAILER_EMAIL,
-      to: process.env.RECEIVER_EMAIL,
-      subject: `MMIL Admin Login Verification Code`,
+    const { data, error } = await resend.emails.send({
+      from: `MMIL <noreply@mmil.club>`,
+      to: [process.env.RECEIVER_EMAIL],
+      subject: "MMIL Admin Login Verification Code",
       text: `Your verification code is: ${otp}. This code will expire in ${OTP_EXPIRES_MIN} minutes.`,
       html: `
       <!DOCTYPE html>
@@ -71,12 +56,16 @@ export const sendMail = async (otp) => {
         </body>
       </html>
       `,
-    };
+    });
 
-    await transport.sendMail(mailOptions);
-    return { success: true };
+    if (error) {
+      console.error("Resend Error:", error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
   } catch (error) {
-    console.log(error);
-    return { success: false };
+    console.error("Resend Exception:", error);
+    return { success: false, error };
   }
 };
