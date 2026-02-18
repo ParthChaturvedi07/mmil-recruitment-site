@@ -30,6 +30,7 @@ const StudentDetailsModal = ({
       communicationScore: student.communicationScore || 0,
       confidenceScore: student.confidenceScore || 0,
       commitmentScore: student.commitmentScore || 0,
+      hosteler: student.hosteler || false,
       score: student.score || 0,
       comment: student.comment || "",
     });
@@ -45,6 +46,7 @@ const StudentDetailsModal = ({
       communicationScore: editedStudent.communicationScore,
       confidenceScore: editedStudent.confidenceScore,
       commitmentScore: editedStudent.commitmentScore,
+      hosteler: editedStudent.hosteler,
       aptitudeStatus: editedStudent.aptitudeStatus,
       technicalStatus: editedStudent.technicalStatus,
       hrStatus: editedStudent.hrStatus,
@@ -57,6 +59,7 @@ const StudentDetailsModal = ({
       communicationScore: student.communicationScore || 0,
       confidenceScore: student.confidenceScore || 0,
       commitmentScore: student.commitmentScore || 0,
+      hosteler: student.hosteler || false,
       aptitudeStatus: student.aptitudeStatus,
       technicalStatus: student.technicalStatus,
       hrStatus: student.hrStatus,
@@ -100,6 +103,7 @@ const StudentDetailsModal = ({
       "communicationScore",
       "confidenceScore",
       "commitmentScore",
+      "hosteler",
       "score",
       "comment",
     ];
@@ -175,11 +179,28 @@ const StudentDetailsModal = ({
                     {student.universityRoll || "-"}
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs text-gray-400">Department</label>
-                  <div className="font-medium capitalize">
-                    {student.department || "-"}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-400">Branch</label>
+                    <div className="font-medium uppercase">
+                      {student.branch || "-"}
+                    </div>
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-400">Year</label>
+                    <div className="font-medium">{student.year || "-"}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <input
+                    type="checkbox"
+                    checked={editedStudent.hosteler || false}
+                    onChange={(e) => handleChange("hosteler", e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label className="text-sm font-medium text-gray-700">
+                    Hosteller
+                  </label>
                 </div>
               </div>
             </div>
@@ -445,11 +466,21 @@ const StudentDetailsModal = ({
 };
 
 const AllApplications = () => {
+  /* State & Filters */
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [department, setDepartment] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    department: "all",
+    technicalStatus: "all",
+    hrStatus: "all",
+    hosteler: "all",
+    minScore: "",
+    year: "all",
+    branch: "",
+  });
   const [selectedStudent, setSelectedStudent] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -457,12 +488,23 @@ const AllApplications = () => {
 
   const fetchStudents = async () => {
     try {
-      const query = new URLSearchParams({ search, department }).toString();
-      const response = await fetch(`${API_BASE}/api/admin/students?${query}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Build Query
+      const queryParams = new URLSearchParams({
+        search,
+        ...filters,
       });
+      // Remove empty parameters
+      if (filters.minScore === "") queryParams.delete("minScore");
+      if (filters.branch === "") queryParams.delete("branch");
+
+      const response = await fetch(
+        `${API_BASE}/api/admin/students?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (!response.ok) {
         if (response.status === 403)
           throw new Error("Access denied. Admins only.");
@@ -480,6 +522,38 @@ const AllApplications = () => {
   useEffect(() => {
     fetchStudentsRef.current = fetchStudents;
   });
+
+  /* Initial Fetch */
+  useEffect(() => {
+    if (!token) {
+      setError("No authentication token found");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]); // Manual filter trigger, only re-fetch on token/mount
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      department: "all",
+      technicalStatus: "all",
+      hrStatus: "all",
+      hosteler: "all",
+      minScore: "",
+      year: "all",
+      branch: "",
+    });
+    setSearch("");
+    // We can trigger fetch here or let user click apply
+    setTimeout(fetchStudents, 0);
+  };
 
   const handleStatusChange = async (
     studentId,
@@ -557,7 +631,8 @@ const AllApplications = () => {
     setStudents([]);
     setError(null);
     fetchStudents();
-  }, [department, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -618,33 +693,197 @@ const AllApplications = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white p-4 rounded-2xl shadow-md mb-8 flex flex-col md:flex-row gap-4">
-          <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-            <input
-              type="text"
-              placeholder="Search by name, email, roll no..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
+        {/* Filters and Search Controls */}
+        <div className="bg-white p-6 rounded-2xl shadow-md mb-8 flex flex-col gap-6 transition-all duration-300">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex-1 w-full flex gap-2">
+              <input
+                type="text"
+                placeholder="Search by name, email, roll no..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow"
+              />
+              <button
+                type="submit"
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+              >
+                Search
+              </button>
+            </form>
+
+            {/* Toggle Filters Button */}
             <button
-              type="submit"
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-4 py-2 border rounded-lg flex items-center gap-2 transition-all ${
+                showFilters
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+              }`}
             >
-              Search
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span>{showFilters ? "Hide Filters" : "Filters"}</span>
             </button>
-          </form>
-          <select
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            className="px-4 py-2 border rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">All Departments</option>
-            <option value="webdev">Web Development</option>
-            <option value="designing">Design</option>
-            <option value="programming">Programming</option>
-            <option value="technical">Technical</option>
-          </select>
+          </div>
+
+          {/* Collapsible Filter Panel */}
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-100 animate-fade-in-down">
+              {/* Department */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Department
+                </label>
+                <select
+                  value={filters.department}
+                  onChange={(e) =>
+                    handleFilterChange("department", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All Departments</option>
+                  <option value="webdev">Web Development</option>
+                  <option value="designing">Design</option>
+                  <option value="programming">Programming</option>
+                  <option value="technical">Technical</option>
+                </select>
+              </div>
+
+              {/* Technical Status */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Technical Status
+                </label>
+                <select
+                  value={filters.technicalStatus}
+                  onChange={(e) =>
+                    handleFilterChange("technicalStatus", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="qualified">Qualified</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              {/* HR Status */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  HR Status
+                </label>
+                <select
+                  value={filters.hrStatus}
+                  onChange={(e) =>
+                    handleFilterChange("hrStatus", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="selected">Selected</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              {/* Hosteller */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Hosteller
+                </label>
+                <select
+                  value={filters.hosteler}
+                  onChange={(e) =>
+                    handleFilterChange("hosteler", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+
+              {/* Year */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Year
+                </label>
+                <select
+                  value={filters.year}
+                  onChange={(e) => handleFilterChange("year", e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All Years</option>
+                  <option value="1">1st Year</option>
+                  <option value="2">2nd Year</option>
+                </select>
+              </div>
+
+              {/* Branch */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Branch
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. CSE, IT"
+                  value={filters.branch}
+                  onChange={(e) => handleFilterChange("branch", e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Min Score */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Min Score
+                </label>
+                <input
+                  type="number"
+                  placeholder="Min Score"
+                  value={filters.minScore}
+                  onChange={(e) =>
+                    handleFilterChange("minScore", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-end gap-2 lg:col-span-1">
+                <button
+                  type="button"
+                  onClick={fetchStudents}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
+                >
+                  Apply Filters
+                </button>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {loading ? (

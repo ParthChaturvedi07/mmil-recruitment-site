@@ -81,7 +81,10 @@ const userSchema = new mongoose.Schema({
   communicationScore: { type: Number, default: 0 },
   confidenceScore: { type: Number, default: 0 },
   commitmentScore: { type: Number, default: 0 },
-  comment: { type: String, default: "" }
+  hosteler: { type: Boolean, default: false },
+  comment: { type: String, default: "" },
+  otp: { type: String, select: false },
+  otpExpires: { type: Date, select: false }
 }, { timestamps: true });
 
 

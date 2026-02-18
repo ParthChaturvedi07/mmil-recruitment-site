@@ -23,11 +23,59 @@ export const getStats = async (req, res) => {
 export const getStudentsByDomain = async (req, res) => {
   try {
     const { domain } = req.params;
+    const {
+      technicalStatus,
+      hrStatus,
+      hosteler,
+      minScore,
+      year,
+      branch,
+      search,
+    } = req.query;
 
-    const students = await userModel.find({
+    let query = {
       role: "student",
-      department: domain
-    }).select('-passwordHash -googleId -__v');
+      department: domain,
+    };
+
+    if (technicalStatus && technicalStatus !== "all") {
+      query.technicalStatus = technicalStatus;
+    }
+
+    if (hrStatus && hrStatus !== "all") {
+      query.hrStatus = hrStatus;
+    }
+
+    if (hosteler !== undefined && hosteler !== "all") {
+      query.hosteler = hosteler === "true";
+    }
+
+    if (minScore) {
+      query.score = { $gte: Number(minScore) };
+    }
+
+    if (year && year !== "all") {
+      query.year = year;
+    }
+
+    if (branch && branch !== "all") {
+      query.branch = { $regex: branch, $options: "i" };
+    }
+
+    if (search) {
+      const escapedSearch = escapeRegex(search);
+      query.$or = [
+        { name: { $regex: escapedSearch, $options: "i" } },
+        { email: { $regex: escapedSearch, $options: "i" } },
+        { admissionNumber: { $regex: escapedSearch, $options: "i" } },
+        { universityRoll: { $regex: escapedSearch, $options: "i" } },
+      ];
+    }
+
+    const students = await userModel
+      .find(query)
+      .select("-passwordHash -googleId -__v")
+      .sort({ createdAt: -1 });
 
     res.json(students);
   } catch (error) {
@@ -37,11 +85,45 @@ export const getStudentsByDomain = async (req, res) => {
 
 export const getAllStudents = async (req, res) => {
   try {
-    const { search, department } = req.query;
+    const {
+      search,
+      department,
+      technicalStatus,
+      hrStatus,
+      hosteler,
+      minScore,
+      year,
+      branch,
+    } = req.query;
+
     let query = { role: "student" };
 
     if (department && department !== "all") {
       query.department = department;
+    }
+
+    if (technicalStatus && technicalStatus !== "all") {
+      query.technicalStatus = technicalStatus;
+    }
+
+    if (hrStatus && hrStatus !== "all") {
+      query.hrStatus = hrStatus;
+    }
+
+    if (hosteler !== undefined && hosteler !== "all") {
+      query.hosteler = hosteler === "true";
+    }
+
+    if (minScore) {
+      query.score = { $gte: Number(minScore) };
+    }
+
+    if (year && year !== "all") {
+      query.year = year;
+    }
+
+    if (branch && branch !== "all") {
+      query.branch = { $regex: branch, $options: "i" };
     }
 
     if (search) {
@@ -50,12 +132,13 @@ export const getAllStudents = async (req, res) => {
         { name: { $regex: escapedSearch, $options: "i" } },
         { email: { $regex: escapedSearch, $options: "i" } },
         { admissionNumber: { $regex: escapedSearch, $options: "i" } },
-        { universityRoll: { $regex: escapedSearch, $options: "i" } }
+        { universityRoll: { $regex: escapedSearch, $options: "i" } },
       ];
     }
 
-    const students = await userModel.find(query)
-      .select('-passwordHash -googleId -__v')
+    const students = await userModel
+      .find(query)
+      .select("-passwordHash -googleId -__v")
       .sort({ createdAt: -1 });
     res.json(students);
   } catch (error) {
@@ -76,6 +159,7 @@ export const updateStudentStatus = async (req, res) => {
       communicationScore,
       confidenceScore,
       commitmentScore,
+      hosteler,
       comment
     } = req.body;
 
@@ -91,6 +175,7 @@ export const updateStudentStatus = async (req, res) => {
         ...(communicationScore !== undefined && { communicationScore }),
         ...(confidenceScore !== undefined && { confidenceScore }),
         ...(commitmentScore !== undefined && { commitmentScore }),
+        ...(hosteler !== undefined && { hosteler }),
         ...(comment !== undefined && { comment })
       },
       { new: true, runValidators: true, context: 'query' }

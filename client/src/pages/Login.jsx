@@ -8,42 +8,67 @@ import { API_ENDPOINTS } from "../config/api.js";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtp, setShowOtp] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleLoginSuccess = (data) => {
+    const { token, needsProfile, userId } = data;
+    localStorage.setItem("token", token);
+    localStorage.setItem("userId", userId);
+
+    if (needsProfile) {
+      navigate("/complete-profile");
+    } else {
+      toast.success("Logged in successfully");
+      navigate("/");
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(API_ENDPOINTS.LOGIN, {
-        email,
-        password,
-      });
+      if (!showOtp) {
+        const res = await axios.post(API_ENDPOINTS.LOGIN, {
+          email,
+          password,
+        });
 
-      const { token, needsProfile, userId } = res.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("userId", userId);
+        if (res.data.requireOtp) {
+          setShowOtp(true);
+          setUserId(res.data.userId);
+          toast.info(res.data.message);
+          setLoading(false);
+          return;
+        }
 
-      if (needsProfile) {
-        navigate("/complete-profile");
+        handleLoginSuccess(res.data);
       } else {
-        toast.success("Logged in successfully");
-        navigate("/");
+        const res = await axios.post(API_ENDPOINTS.VERIFY_OTP, {
+          userId,
+          otp,
+        });
+        handleLoginSuccess(res.data);
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Login failed");
     } finally {
-      setLoading(false);
+      if (!showOtp || otp) setLoading(false); // Only stop loading if not switching to OTP view
     }
   };
 
   return (
     /* Main Container */
     <div className="relative h-screen w-full bg-[#FDF5E6] flex flex-col items-center justify-start font-montserrat overflow-x-hidden overflow-y-auto">
-
       {/* BACKGROUND TEXT — always visible on all screens including mobile */}
       <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none overflow-visible mt-10 sm:mt-0">
-        <div className="flex flex-col scale-150 sm:scale-0 gap-[80px] sm:gap-0 items-center opacity-20" style={{ width: "100vw" }}>
+        <div
+          className="flex flex-col scale-150 sm:scale-0 gap-[80px] sm:gap-0 items-center opacity-20"
+          style={{ width: "100vw" }}
+        >
           {["Inspire", "Invent", "Innovate"].map((word, i) => (
             <h1
               key={i}
@@ -61,21 +86,49 @@ function Login() {
         </div>
       </div>
 
-
       {/* DECORATIVE ELEMENTS — hidden on small screens */}
       <div className="absolute inset-0 pointer-events-none hidden md:block">
-        <div className="absolute flex flex-col items-center" style={{ top: "143px", right: "calc(50% - 620px)" }}>
-          <img src="/light-bulb 1.png" alt="Bulb" className="w-[110px] h-auto object-contain z-20" />
+        <div
+          className="absolute flex flex-col items-center"
+          style={{ top: "143px", right: "calc(50% - 620px)" }}
+        >
+          <img
+            src="/light-bulb 1.png"
+            alt="Bulb"
+            className="w-[110px] h-auto object-contain z-20"
+          />
           <div className="absolute top-[110px] right-[8%] z-0">
-            <img src="/Vector 1.png" alt="Line Decoration" style={{ width: "375px", height: "210px" }} />
+            <img
+              src="/Vector 1.png"
+              alt="Line Decoration"
+              style={{ width: "375px", height: "210px" }}
+            />
           </div>
         </div>
       </div>
 
       {/* STAR DECORATIONS — hidden on small screens */}
       <div className="absolute inset-0 pointer-events-none hidden md:block">
-        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "40px", left: "calc(50% - 410px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
-        <img src="/Vector 2.png" alt="Star" className="absolute w-[80px] h-auto" style={{ top: "685px", left: "calc(50% - 500px)", filter: "sepia(1) saturate(5) hue-rotate(-30deg)" }} />
+        <img
+          src="/Vector 2.png"
+          alt="Star"
+          className="absolute w-[80px] h-auto"
+          style={{
+            top: "40px",
+            left: "calc(50% - 410px)",
+            filter: "sepia(1) saturate(5) hue-rotate(-30deg)",
+          }}
+        />
+        <img
+          src="/Vector 2.png"
+          alt="Star"
+          className="absolute w-[80px] h-auto"
+          style={{
+            top: "685px",
+            left: "calc(50% - 500px)",
+            filter: "sepia(1) saturate(5) hue-rotate(-30deg)",
+          }}
+        />
       </div>
 
       {/* LOGO — top center */}
@@ -90,28 +143,47 @@ function Login() {
       {/* LOGIN CARD — fills remaining height, vertically centered */}
       <div className="z-20 w-full max-w-[480px] px-4 flex-1 flex items-center justify-center">
         <div className="w-full bg-[#FDE2D8] rounded-[30px] px-7 py-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex flex-col items-center border border-white/20">
+          <h2 className="text-[#1A1A1A] font-black text-2xl mb-5 sm:mb-8">
+            Welcome Back !
+          </h2>
 
-          <h2 className="text-[#1A1A1A] font-black text-2xl mb-5 sm:mb-8">Welcome Back !</h2>
-
-          <form onSubmit={onSubmit} className="w-full flex flex-col items-center">
+          <form
+            onSubmit={onSubmit}
+            className="w-full flex flex-col items-center"
+          >
             {/* Stacked input group */}
             <div className="w-full bg-white rounded-xl overflow-hidden shadow-sm mb-4 sm:mb-6">
-              <input
-                className="w-full h-[50px] sm:h-[55px] px-6 text-sm outline-none border-b border-gray-200 placeholder:text-gray-400"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <input
-                className="w-full h-[50px] sm:h-[55px] px-6 text-sm outline-none placeholder:text-gray-400"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              {!showOtp ? (
+                <>
+                  <input
+                    className="w-full h-[50px] sm:h-[55px] px-6 text-sm outline-none border-b border-gray-200 placeholder:text-gray-400"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <input
+                    className="w-full h-[50px] sm:h-[55px] px-6 text-sm outline-none placeholder:text-gray-400"
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </>
+              ) : (
+                <input
+                  className="w-full h-[50px] sm:h-[55px] px-6 outline-none placeholder:text-gray-400 text-center text-lg tracking-widest"
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                  required
+                  autoFocus
+                />
+              )}
             </div>
 
             <button
@@ -119,7 +191,7 @@ function Login() {
               disabled={loading}
               className="w-full h-[50px] sm:h-[55px] bg-[#72341E] text-white rounded-xl font-bold text-base sm:text-lg shadow   -lg active:scale-95 transition-all mb-4 sm:mb-6"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Processsing..." : showOtp ? "Verify OTP" : "Login"}
             </button>
           </form>
 
@@ -142,10 +214,8 @@ function Login() {
               Register
             </span>
           </p>
-
         </div>
       </div>
-
     </div>
   );
 }

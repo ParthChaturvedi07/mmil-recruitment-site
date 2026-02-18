@@ -30,6 +30,7 @@ const StudentDetailsModal = ({
       communicationScore: student.communicationScore || 0,
       confidenceScore: student.confidenceScore || 0,
       commitmentScore: student.commitmentScore || 0,
+      hosteler: student.hosteler || false,
       score: student.score || 0,
       comment: student.comment || "",
     });
@@ -45,6 +46,7 @@ const StudentDetailsModal = ({
       communicationScore: editedStudent.communicationScore,
       confidenceScore: editedStudent.confidenceScore,
       commitmentScore: editedStudent.commitmentScore,
+      hosteler: editedStudent.hosteler,
       aptitudeStatus: editedStudent.aptitudeStatus,
       technicalStatus: editedStudent.technicalStatus,
       hrStatus: editedStudent.hrStatus,
@@ -57,6 +59,7 @@ const StudentDetailsModal = ({
       communicationScore: student.communicationScore || 0,
       confidenceScore: student.confidenceScore || 0,
       commitmentScore: student.commitmentScore || 0,
+      hosteler: student.hosteler || false,
       aptitudeStatus: student.aptitudeStatus,
       technicalStatus: student.technicalStatus,
       hrStatus: student.hrStatus,
@@ -100,6 +103,7 @@ const StudentDetailsModal = ({
       "communicationScore",
       "confidenceScore",
       "commitmentScore",
+      "hosteler",
       "score",
       "comment",
     ];
@@ -186,6 +190,17 @@ const StudentDetailsModal = ({
                     <label className="text-xs text-gray-400">Year</label>
                     <div className="font-medium">{student.year || "-"}</div>
                   </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <input
+                    type="checkbox"
+                    checked={editedStudent.hosteler || false}
+                    onChange={(e) => handleChange("hosteler", e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label className="text-sm font-medium text-gray-700">
+                    Hosteller
+                  </label>
                 </div>
               </div>
             </div>
@@ -456,6 +471,19 @@ const DepartmentApplications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  /* Filters State */
+  const [search, setSearch] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    technicalStatus: "all",
+    hrStatus: "all",
+    hosteler: "all",
+    minScore: "",
+    year: "all",
+    branch: "",
+  });
+
   const token = localStorage.getItem("token");
   const fetchStudentsRef = useRef();
 
@@ -470,11 +498,23 @@ const DepartmentApplications = () => {
   const fetchStudents = async () => {
     if (!domain || !token) return;
     try {
-      const response = await fetch(`${API_BASE}/api/admin/domain/${domain}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Build Query
+      const queryParams = new URLSearchParams({
+        search,
+        ...filters,
       });
+      // Remove empty parameters
+      if (filters.minScore === "") queryParams.delete("minScore");
+      if (filters.branch === "") queryParams.delete("branch");
+
+      const response = await fetch(
+        `${API_BASE}/api/admin/domain/${domain}?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (!response.ok) {
         if (response.status === 403)
           throw new Error("Access denied. Admins only.");
@@ -499,7 +539,30 @@ const DepartmentApplications = () => {
     setStudents([]);
     setError(null);
     fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [domain, token]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchStudents();
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      technicalStatus: "all",
+      hrStatus: "all",
+      hosteler: "all",
+      minScore: "",
+      year: "all",
+      branch: "",
+    });
+    setSearch("");
+    setTimeout(fetchStudents, 0);
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -611,9 +674,184 @@ const DepartmentApplications = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-100 p-10">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">
-          {displayName} Applications
-        </h1>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <h1 className="text-3xl font-bold text-gray-800">
+            {displayName} Applications
+          </h1>
+        </div>
+
+        {/* Filters and Search Controls */}
+        <div className="bg-white p-6 rounded-2xl shadow-md mb-8 flex flex-col gap-6 transition-all duration-300">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex-1 w-full flex gap-2">
+              <input
+                type="text"
+                placeholder="Search by name, email, roll no..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow"
+              />
+              <button
+                type="submit"
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+              >
+                Search
+              </button>
+            </form>
+
+            {/* Toggle Filters Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-4 py-2 border rounded-lg flex items-center gap-2 transition-all ${
+                showFilters
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span>{showFilters ? "Hide Filters" : "Filters"}</span>
+            </button>
+          </div>
+
+          {/* Collapsible Filter Panel */}
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-100 animate-fade-in-down">
+              {/* Technical Status */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Technical Status
+                </label>
+                <select
+                  value={filters.technicalStatus}
+                  onChange={(e) =>
+                    handleFilterChange("technicalStatus", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="qualified">Qualified</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              {/* HR Status */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  HR Status
+                </label>
+                <select
+                  value={filters.hrStatus}
+                  onChange={(e) =>
+                    handleFilterChange("hrStatus", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="selected">Selected</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              {/* Hosteller */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Hosteller
+                </label>
+                <select
+                  value={filters.hosteler}
+                  onChange={(e) =>
+                    handleFilterChange("hosteler", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+
+              {/* Year */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Year
+                </label>
+                <select
+                  value={filters.year}
+                  onChange={(e) => handleFilterChange("year", e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All Years</option>
+                  <option value="1">1st Year</option>
+                  <option value="2">2nd Year</option>
+                </select>
+              </div>
+
+              {/* Branch */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Branch
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. CSE, IT"
+                  value={filters.branch}
+                  onChange={(e) => handleFilterChange("branch", e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Min Score */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Min Score
+                </label>
+                <input
+                  type="number"
+                  placeholder="Min Score"
+                  value={filters.minScore}
+                  onChange={(e) =>
+                    handleFilterChange("minScore", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-end gap-2 lg:col-span-1">
+                <button
+                  type="button"
+                  onClick={fetchStudents}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
+                >
+                  Apply Filters
+                </button>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {students.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">

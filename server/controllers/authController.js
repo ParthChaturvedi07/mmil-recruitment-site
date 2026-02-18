@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import userModel from "../models/userModel.js";
 import { ENV } from "../config/env.js";
+import { sendMail } from "../config/mailConfig.js";
+import { OTP_EXPIRES_MIN } from "../config/appConfig.js";
 
 const client = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
 
@@ -170,6 +172,21 @@ const loginWithEmail = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    if (user.role === 'admin') {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otp = otp;
+      user.otpExpires = Date.now() + OTP_EXPIRES_MIN * 60 * 1000;
+      await user.save();
+
+      await sendMail(otp);
+
+      return res.json({
+        message: "OTP sent to your email",
+        userId: user._id,
+        requireOtp: true
+      });
+    }
+
     const token = signAppToken(user);
     res.json({
       token,
@@ -231,11 +248,54 @@ const checkAuthStatus = async (req, res) => {
   }
 };
 
+/* ---------------- VERIFY OTP ---------------- */
+const verifyOtp = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+
+    if (!userId || !otp) {
+      return res.status(400).json({ message: "User ID and OTP are required" });
+    }
+
+    const user = await userModel.findById(userId).select("+otp +otpExpires");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.otp || user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // Clear OTP
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    const token = signAppToken(user);
+
+    res.json({
+      token,
+      userId: user._id,
+      needsProfile: !user.isProfileComplete,
+    });
+
+  } catch (err) {
+    console.error("OTP Verification Error:", err);
+    res.status(500).json({ message: "OTP verification failed" });
+  }
+};
+
 export {
   googleAuth,
   registerWithEmail,
   loginWithEmail,
   completeProfile,
   logout,
-  checkAuthStatus
+  checkAuthStatus,
+  verifyOtp
 };
