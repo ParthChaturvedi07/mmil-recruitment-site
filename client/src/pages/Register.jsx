@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
-import AuthButton from "../components/AuthButton";
+
 import { API_ENDPOINTS } from "../config/api.js";
 
 function Register() {
@@ -96,66 +96,16 @@ function Register() {
             Create an account to join us
           </p>
 
-          <form onSubmit={onSubmit} className="mt-2 space-y-2">
-            <div>
-              <label className="block text-sm text-slate-700">Name</label>
-              <input
-                className="mt-1 w-full bg-white border rounded-lg px-3 py-2 text-sm"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-slate-700">Email</label>
-              <input
-                className="mt-1 w-full bg-white border rounded-lg px-3 py-2 text-sm"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-slate-700">Password</label>
-              <input
-                className="mt-1 w-full bg-white border rounded-lg px-3 py-2 text-sm"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <p className="text-xs text-slate-600 mt-1">Minimum 6 characters.</p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#72341E] text-white rounded-lg py-2 text-sm disabled:opacity-60 mt-1"
-            >
-              {loading ? "Creating..." : "Create account"}
-            </button>
-          </form>
-
-          <div className="my-3 flex items-center gap-3">
-            <div className="h-px bg-[#777373] flex-1" />
-            <span className="text-xs font-bold text-[#B18779]">OR</span>
-            <div className="h-px bg-[#777373] flex-1" />
+          <div className="mt-8 mb-8 text-center">
+            <p className="text-lg font-bold text-[#72341E]">Registrations are currently closed.</p>
           </div>
 
-          <div className="flex justify-center">
-            <AuthButton />
-          </div>
-
-          <p className="text-sm text-slate-600 mt-4">
+          <p className="text-sm text-slate-600 mt-4 text-center">
             Already have an account?{" "}
             <Link to="/login" className="text-[#72341E] font-medium">
               Login
             </Link>
           </p>
-
         </div>
       </div>
 

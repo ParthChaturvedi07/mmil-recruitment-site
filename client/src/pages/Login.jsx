@@ -135,9 +135,12 @@ function Login() {
 
           <p className="text-sm text-slate-600 mt-4 sm:mt-6">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="text-blue-700 font-medium">
+            <span
+              onClick={() => toast.error("Registrations are closed now")}
+              className="text-blue-700 font-medium cursor-pointer hover:underline"
+            >
               Register
-            </Link>
+            </span>
           </p>
 
         </div>

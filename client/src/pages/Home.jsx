@@ -147,7 +147,7 @@ const Home = () => {
         {/* Register Now Button */}
         {!token && (
           <button
-            onClick={() => navigate('/register')}
+            onClick={() => toast.error("Registrations are closed now")}
             className="mt-6 md:mt-8 w-full max-w-[408px] h-[55px] md:h-[68px] bg-[#5D2E17] text-white font-black text-xl md:text-2xl rounded-[15px] md:rounded-[20px] shadow-2xl hover:brightness-110 transition-all active:scale-95 uppercase tracking-widest"
           >
             Register Now

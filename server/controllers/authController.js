@@ -46,16 +46,8 @@ const googleAuth = async (req, res) => {
         emitAdminUpdate({ userId: user._id, type: "user_linked_google" });
       }
     } else {
-      // SCENARIO B: New User. Create them.
-      user = await userModel.create({
-        name,
-        email: normalizedEmail,
-        googleId: sub, // Here we DO provide googleId
-        onboardingStep: 0,
-        isProfileComplete: false
-      });
-      const { emitAdminUpdate } = await import("../utils/socket.js");
-      emitAdminUpdate({ userId: user._id, type: "new_registration", method: "google" });
+      // SCENARIO B: New User. BLOCK THEM.
+      return res.status(403).json({ message: "Registrations are currently closed." });
     }
 
     // 3. Generate Token
@@ -144,24 +136,8 @@ const registerWithEmail = async (req, res) => {
     }
 
     // SCENARIO 3: New User
-    // CRITICAL: Do NOT pass "googleId: null" here. Just omit it.
-    user = await userModel.create({
-      name: name || "",
-      email: normalizedEmail,
-      passwordHash: await bcrypt.hash(password, 10),
-      onboardingStep: 0,
-      isProfileComplete: false,
-    });
-
-    const { emitAdminUpdate } = await import("../utils/socket.js");
-    emitAdminUpdate({ userId: user._id, type: "new_registration", method: "email" });
-
-    const token = signAppToken(user);
-    return res.status(201).json({
-      token,
-      userId: user._id,
-      needsProfile: !user.isProfileComplete
-    });
+    // BLOCK REGISTRATIONS
+    return res.status(403).json({ message: "Registrations are currently closed." });
 
   } catch (err) {
     console.error("Register Error:", err);
