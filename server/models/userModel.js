@@ -75,7 +75,13 @@ const userSchema = new mongoose.Schema({
   score: {
     type: Number,
     default: 0
-  }
+  },
+  technicalScore: { type: Number, default: 0 },
+  problemSolvingScore: { type: Number, default: 0 },
+  communicationScore: { type: Number, default: 0 },
+  confidenceScore: { type: Number, default: 0 },
+  commitmentScore: { type: Number, default: 0 },
+  comment: { type: String, default: "" }
 }, { timestamps: true });
 
 

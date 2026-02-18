@@ -66,7 +66,18 @@ export const getAllStudents = async (req, res) => {
 export const updateStudentStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { aptitudeStatus, technicalStatus, hrStatus, score } = req.body;
+    const { 
+      aptitudeStatus, 
+      technicalStatus, 
+      hrStatus, 
+      score,
+      technicalScore,
+      problemSolvingScore,
+      communicationScore,
+      confidenceScore,
+      commitmentScore,
+      comment
+    } = req.body;
 
     const updatedUser = await userModel.findByIdAndUpdate(
       id,
@@ -75,6 +86,12 @@ export const updateStudentStatus = async (req, res) => {
         ...(technicalStatus && { technicalStatus }),
         ...(hrStatus && { hrStatus }),
         ...(score !== undefined && { score }),
+        ...(technicalScore !== undefined && { technicalScore }),
+        ...(problemSolvingScore !== undefined && { problemSolvingScore }),
+        ...(communicationScore !== undefined && { communicationScore }),
+        ...(confidenceScore !== undefined && { confidenceScore }),
+        ...(commitmentScore !== undefined && { commitmentScore }),
+        ...(comment !== undefined && { comment })
       },
       { new: true, runValidators: true, context: 'query' }
     );
