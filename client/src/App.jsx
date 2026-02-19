@@ -19,6 +19,10 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { API_ENDPOINTS } from "./config/api";
+import Results from "./pages/Results";
+
+
+
 
 /* Splash Screen Component  */
 
@@ -215,9 +219,11 @@ const App = () => {
         <>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/results" element={<Results />} />
             <Route element={<PublicRoute />}>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+             
             </Route>
             <Route path="/complete-profile" element={<Chatbot />} />
             <Route element={<PrivateRoute />}>
