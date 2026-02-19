@@ -62,6 +62,11 @@ export const getStudentsByDomain = async (req, res) => {
       query.branch = { $regex: branch, $options: "i" };
     }
 
+    if (req.query.hasResume === "true") {
+      query.resume = { $exists: true, $ne: null };
+    }
+
+
     if (search) {
       const escapedSearch = escapeRegex(search);
       query.$or = [
@@ -72,10 +77,31 @@ export const getStudentsByDomain = async (req, res) => {
       ];
     }
 
-    const students = await userModel
-      .find(query)
-      .select("-passwordHash -googleId -__v")
-      .sort({ createdAt: -1 });
+    const students = await userModel.aggregate([
+      { $match: query },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "resumes",
+          localField: "_id",
+          foreignField: "uploadedBy",
+          as: "resumeDoc",
+        },
+      },
+      {
+        $addFields: {
+          resumeId: { $arrayElemAt: ["$resumeDoc._id", 0] },
+        },
+      },
+      {
+        $project: {
+          passwordHash: 0,
+          googleId: 0,
+          __v: 0,
+          resumeDoc: 0,
+        },
+      },
+    ]);
 
     res.json(students);
   } catch (error) {
@@ -126,6 +152,11 @@ export const getAllStudents = async (req, res) => {
       query.branch = { $regex: branch, $options: "i" };
     }
 
+    if (req.query.hasResume === "true") {
+      query.resume = { $exists: true, $ne: null };
+    }
+
+
     if (search) {
       const escapedSearch = escapeRegex(search);
       query.$or = [
@@ -136,10 +167,31 @@ export const getAllStudents = async (req, res) => {
       ];
     }
 
-    const students = await userModel
-      .find(query)
-      .select("-passwordHash -googleId -__v")
-      .sort({ createdAt: -1 });
+    const students = await userModel.aggregate([
+      { $match: query },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "resumes",
+          localField: "_id",
+          foreignField: "uploadedBy",
+          as: "resumeDoc",
+        },
+      },
+      {
+        $addFields: {
+          resumeId: { $arrayElemAt: ["$resumeDoc._id", 0] },
+        },
+      },
+      {
+        $project: {
+          passwordHash: 0,
+          googleId: 0,
+          __v: 0,
+          resumeDoc: 0,
+        },
+      },
+    ]);
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -149,10 +201,10 @@ export const getAllStudents = async (req, res) => {
 export const updateStudentStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      aptitudeStatus, 
-      technicalStatus, 
-      hrStatus, 
+    const {
+      aptitudeStatus,
+      technicalStatus,
+      hrStatus,
       score,
       technicalScore,
       problemSolvingScore,
@@ -165,7 +217,7 @@ export const updateStudentStatus = async (req, res) => {
 
     const updatedUser = await userModel.findByIdAndUpdate(
       id,
-      { 
+      {
         ...(aptitudeStatus && { aptitudeStatus }),
         ...(technicalStatus && { technicalStatus }),
         ...(hrStatus && { hrStatus }),

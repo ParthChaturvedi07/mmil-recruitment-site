@@ -5,7 +5,9 @@ import { submitTechnicalProject, getTechnicalProjects } from "../controllers/tec
 
 const router = express.Router();
 
-router.post("/submit", authMiddleware, technicalMiddleware, submitTechnicalProject);
+import submissionClosedMiddleware from "../middlewares/submissionClosedMiddleware.js";
+
+router.post("/submit", authMiddleware, submissionClosedMiddleware, technicalMiddleware, submitTechnicalProject);
 router.get("/my-project", authMiddleware, getTechnicalProjects);
 
 export default router

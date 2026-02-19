@@ -4,6 +4,8 @@ import { submitProgrammingProject } from "../controllers/programmingController.j
 
 const router = express.Router();
 
-router.post("/submit", authMiddleware, submitProgrammingProject);
+import submissionClosedMiddleware from "../middlewares/submissionClosedMiddleware.js";
+
+router.post("/submit", authMiddleware, submissionClosedMiddleware, submitProgrammingProject);
 
 export default router;

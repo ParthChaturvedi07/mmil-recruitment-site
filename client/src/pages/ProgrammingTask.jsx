@@ -64,7 +64,11 @@ const ProgrammingTask = () => {
 
             <div className="mb-4">
                 <h3 className="text-sm font-bold text-[#1A1A1A] mb-3">Details to be filled by students.</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Submissions Closed!</strong>
+                    <span className="block sm:inline"> The deadline for project submissions has passed.</span>
+                </div>
+                <form className="space-y-4 opacity-50 pointer-events-none">
                     <div>
                         <input
                             type="text"
@@ -72,7 +76,7 @@ const ProgrammingTask = () => {
                             placeholder="Phone number*"
                             value={formData.phoneNumber}
                             onChange={handleChange}
-                            required
+                            disabled
                             className="w-full bg-transparent border-b border-black text-sm py-2 focus:outline-none focus:border-[#5D2E17] placeholder-gray-500"
                         />
                     </div>
@@ -83,22 +87,22 @@ const ProgrammingTask = () => {
                             placeholder="HackerRank Username*"
                             value={formData.hackerRankUsername}
                             onChange={handleChange}
-                            required
+                            disabled
                             className="w-full bg-transparent border-b border-black text-sm py-2 focus:outline-none focus:border-[#5D2E17] placeholder-gray-500"
                         />
                     </div>
 
                     <div className="text-center mt-4 text-xs">
-                        <a href="https://www.hackerrank.com" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] underline">Click Here</a> to go the contest page.
+                        <span className="text-gray-400">Contest link unavailable</span>
                     </div>
 
                     <div className="flex justify-center mt-6">
                         <button
-                            type="submit"
-                            disabled={loading}
-                            className="bg-[#6D3019] text-white px-8 py-2 rounded-full font-bold text-sm hover:scale-105 transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                            type="button"
+                            disabled
+                            className="bg-gray-400 text-white px-8 py-2 rounded-full font-bold text-sm cursor-not-allowed"
                         >
-                            {loading ? "Submitting..." : "Submit"}
+                            Submissions Closed
                         </button>
                     </div>
                 </form>

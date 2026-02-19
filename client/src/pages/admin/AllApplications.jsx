@@ -242,7 +242,16 @@ const StudentDetailsModal = ({
                       <span>Figma</span>
                     </a>
                   )}
-                  {student.resume && (
+                  {student.resumeId ? (
+                    <a
+                      href={`${API_BASE}/api/profile/resume/${student.resumeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-blue-700"
+                    >
+                      <span>Resume PDF</span>
+                    </a>
+                  ) : student.resume && (
                     <a
                       href={`${API_BASE}/${student.resume}`}
                       target="_blank"
@@ -387,13 +396,12 @@ const StudentDetailsModal = ({
               <select
                 value={editedStudent.aptitudeStatus || "pending"}
                 onChange={(e) => handleChange("aptitudeStatus", e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${
-                  editedStudent.aptitudeStatus === "qualified"
-                    ? "bg-green-50 text-green-800 border-green-200"
-                    : editedStudent.aptitudeStatus === "rejected"
-                      ? "bg-red-50 text-red-800 border-red-200"
-                      : "bg-yellow-50 text-yellow-800 border-yellow-200"
-                }`}
+                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${editedStudent.aptitudeStatus === "qualified"
+                  ? "bg-green-50 text-green-800 border-green-200"
+                  : editedStudent.aptitudeStatus === "rejected"
+                    ? "bg-red-50 text-red-800 border-red-200"
+                    : "bg-yellow-50 text-yellow-800 border-yellow-200"
+                  }`}
               >
                 <option value="pending">Pending</option>
                 <option value="qualified">Qualified</option>
@@ -410,13 +418,12 @@ const StudentDetailsModal = ({
                 onChange={(e) =>
                   handleChange("technicalStatus", e.target.value)
                 }
-                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${
-                  editedStudent.technicalStatus === "qualified"
-                    ? "bg-green-50 text-green-800 border-green-200"
-                    : editedStudent.technicalStatus === "rejected"
-                      ? "bg-red-50 text-red-800 border-red-200"
-                      : "bg-yellow-50 text-yellow-800 border-yellow-200"
-                }`}
+                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${editedStudent.technicalStatus === "qualified"
+                  ? "bg-green-50 text-green-800 border-green-200"
+                  : editedStudent.technicalStatus === "rejected"
+                    ? "bg-red-50 text-red-800 border-red-200"
+                    : "bg-yellow-50 text-yellow-800 border-yellow-200"
+                  }`}
               >
                 <option value="pending">Pending</option>
                 <option value="qualified">Qualified</option>
@@ -431,13 +438,12 @@ const StudentDetailsModal = ({
               <select
                 value={editedStudent.hrStatus || "pending"}
                 onChange={(e) => handleChange("hrStatus", e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${
-                  editedStudent.hrStatus === "selected"
-                    ? "bg-green-50 text-green-800 border-green-200"
-                    : editedStudent.hrStatus === "rejected"
-                      ? "bg-red-50 text-red-800 border-red-200"
-                      : "bg-yellow-50 text-yellow-800 border-yellow-200"
-                }`}
+                className={`w-full px-3 py-2 rounded-lg border outline-none cursor-pointer ${editedStudent.hrStatus === "selected"
+                  ? "bg-green-50 text-green-800 border-green-200"
+                  : editedStudent.hrStatus === "rejected"
+                    ? "bg-red-50 text-red-800 border-red-200"
+                    : "bg-yellow-50 text-yellow-800 border-yellow-200"
+                  }`}
               >
                 <option value="pending">Pending</option>
                 <option value="selected">Selected</option>
@@ -450,11 +456,10 @@ const StudentDetailsModal = ({
             <button
               onClick={handleSave}
               disabled={!hasChanges || isSaving}
-              className={`px-6 py-2 rounded-lg font-bold text-white transition-all transform active:scale-95 ${
-                !hasChanges || isSaving
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg"
-              }`}
+              className={`px-6 py-2 rounded-lg font-bold text-white transition-all transform active:scale-95 ${!hasChanges || isSaving
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg"
+                }`}
             >
               {isSaving ? "Updating..." : "Update Changes"}
             </button>
@@ -480,6 +485,7 @@ const AllApplications = () => {
     minScore: "",
     year: "all",
     branch: "",
+    hasResume: "all",
   });
   const [selectedStudent, setSelectedStudent] = useState(null);
   const navigate = useNavigate();
@@ -549,6 +555,7 @@ const AllApplications = () => {
       minScore: "",
       year: "all",
       branch: "",
+      hasResume: "all",
     });
     setSearch("");
     // We can trigger fetch here or let user click apply
@@ -716,11 +723,10 @@ const AllApplications = () => {
             {/* Toggle Filters Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 border rounded-lg flex items-center gap-2 transition-all ${
-                showFilters
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
-              }`}
+              className={`px-4 py-2 border rounded-lg flex items-center gap-2 transition-all ${showFilters
+                ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                : "border-gray-300 hover:bg-gray-50 text-gray-700"
+                }`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -810,6 +816,23 @@ const AllApplications = () => {
                   value={filters.hosteler}
                   onChange={(e) =>
                     handleFilterChange("hosteler", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+                >
+                  <option value="all">All</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+
+              {/* Resume Uploaded */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase">
+                  Resume Uploaded
+                </label>
+                <select
+                  value={filters.hasResume}
+                  onChange={(e) =>
+                    handleFilterChange("hasResume", e.target.value)
                   }
                   className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
                 >
@@ -916,6 +939,9 @@ const AllApplications = () => {
                       Score
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold whitespace-nowrap">
+                      Resume
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold whitespace-nowrap">
                       Contact
                     </th>
                   </tr>
@@ -945,6 +971,31 @@ const AllApplications = () => {
                       </td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                         {student.score || 0}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                        {student.resumeId ? (
+                          <a
+                            href={`${API_BASE}/api/profile/resume/${student.resumeId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-indigo-600 hover:text-indigo-800 underline"
+                          >
+                            View
+                          </a>
+                        ) : student.resume ? (
+                          <a
+                            href={`${API_BASE}/${student.resume}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-indigo-600 hover:text-indigo-800 underline"
+                          >
+                            View
+                          </a>
+                        ) : (
+                          <span className="text-gray-400">No</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
                         <div className="flex flex-col">

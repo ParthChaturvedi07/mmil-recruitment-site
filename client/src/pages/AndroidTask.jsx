@@ -73,7 +73,11 @@ const AndroidTask = () => {
 
             <div className="mb-4">
                 <h3 className="text-sm font-bold text-[#1A1A1A] mb-3">Details to be filled by students.</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Submissions Closed!</strong>
+                    <span className="block sm:inline"> The deadline for project submissions has passed.</span>
+                </div>
+                <form className="space-y-4 opacity-50 pointer-events-none">
                     <div>
                         <input
                             type="text"
@@ -81,8 +85,7 @@ const AndroidTask = () => {
                             placeholder="Phone number*"
                             value={formData.phoneNumber}
                             onChange={handleChange}
-                            onBlur={handleBlur}
-                            required
+                            disabled
                             className="w-full bg-transparent border-b border-black text-sm py-2 focus:outline-none focus:border-[#5D2E17] placeholder-gray-500"
                         />
                     </div>
@@ -94,15 +97,9 @@ const AndroidTask = () => {
                             placeholder="Github Link*"
                             value={formData.githubLink}
                             onChange={handleChange}
-                            onBlur={handleBlur}
-                            required
+                            disabled
                             className="w-full bg-transparent border border-black rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#5D2E17] placeholder-gray-500"
                         />
-                        {formData.githubLink && (
-                            <button type="button" onClick={() => setFormData({ ...formData, githubLink: '' })} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black">
-                                ✕
-                            </button>
-                        )}
                     </div>
 
                     <div className="relative">
@@ -112,25 +109,19 @@ const AndroidTask = () => {
                             placeholder="G-drive Link*"
                             value={formData.projectLink}
                             onChange={handleChange}
-                            onBlur={handleBlur}
-                            required
+                            disabled
                             className="w-full bg-transparent border border-black rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#5D2E17] placeholder-gray-500"
                         />
-                        {formData.projectLink && (
-                            <button type="button" onClick={() => setFormData({ ...formData, projectLink: '' })} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black">
-                                ✕
-                            </button>
-                        )}
                     </div>
 
 
                     <div className="flex justify-center mt-6">
                         <button
-                            type="submit"
-                            disabled={loading}
-                            className="bg-[#6D3019] text-white px-8 py-2 rounded-full font-bold text-sm hover:scale-105 transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                            type="button"
+                            disabled
+                            className="bg-gray-400 text-white px-8 py-2 rounded-full font-bold text-sm cursor-not-allowed"
                         >
-                            {loading ? "Submitting..." : "Submit"}
+                            Submissions Closed
                         </button>
                     </div>
                 </form>

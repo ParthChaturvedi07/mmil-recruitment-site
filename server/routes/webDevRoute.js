@@ -7,7 +7,9 @@ import webDevMiddleware from "../middlewares/webDevMiddleware.js";
 const router = express.Router();
 
 
-router.post("/submit", authMiddleware, webDevMiddleware, submitWebDevProject);
+import submissionClosedMiddleware from "../middlewares/submissionClosedMiddleware.js";
+
+router.post("/submit", authMiddleware, submissionClosedMiddleware, webDevMiddleware, submitWebDevProject);
 
 
 router.get("/my-project", authMiddleware, getMyProject);

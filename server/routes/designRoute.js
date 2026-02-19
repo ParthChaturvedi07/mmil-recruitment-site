@@ -9,9 +9,12 @@ import designMiddleware from "../middlewares/designMiddleware.js";
 
 const designRouter = express.Router();
 
+import submissionClosedMiddleware from "../middlewares/submissionClosedMiddleware.js";
+
 designRouter.post(
   "/add",
   authMiddleware,
+  submissionClosedMiddleware,
   designMiddleware,
 
   addDesignProject,
