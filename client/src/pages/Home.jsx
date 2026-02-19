@@ -42,16 +42,16 @@ const Home = () => {
     },
   ];
 
-  const handleToast = (round) => {
-    if (round == "Result") {
-      toast.info("Result Yet to be Announced");
-    } else if (round === "Technical Round") {
-      navigate('/task/webdev');
-    } else {
-      console.log(round);
-      toast.info("Round Yet to be Started");
-    }
-  };
+const handleToast = (round) => {
+  if (round === "Result") {
+    navigate('/results'); 
+  } else if (round === "Technical Round") {
+    navigate('/task/webdev');
+  } else {
+    console.log(round);
+    toast.info("Round Yet to be Started");
+  }
+};
 
   return (
     <div className="relative min-h-screen w-full bg-[#FDF5E6] flex flex-col items-center font-montserrat overflow-x-hidden">
